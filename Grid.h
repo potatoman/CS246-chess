@@ -11,11 +11,11 @@ enum class BotLevel { Level1, Level2, Level3 };
 
 class Grid {
   std::vector<std::vector<Cell>> board;
-  std::vector<Piece> player1pieces;
-  std::vector<Piece> player2pieces;
+  std::vector<PieceType> player1pieces;
+  std::vector<PieceType> player2pieces;
   Cell *WKpos;
   Cell *BKpos;
-  bool WKmoved, BKmoved, LWRmoved, RWRmoved, LBRmoved, RBRmoved;
+  bool WKmoved, BKmoved, LWRmoved, RWRmoved, LBRmoved, RBRmoved = false;
 
 
   TextDisplay *td;
@@ -23,8 +23,10 @@ class Grid {
 
 
   bool legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int colB);
-  bool checkCheck(colour colour);
-  bool movementCheck(PieceType piece);
+  bool checkCheck(Colour colour);
+  bool movementCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB);
+  bool checkCheckMate(Colour colour);
+  bool blockCheck();
 
  public:
   Grid();
@@ -34,11 +36,11 @@ class Grid {
   
 
   void init();
-  void add(colour colour, PieceType piece, int row, int col);
+  void add(Colour colour, PieceType piece, int row, int col);
   void remove(int row, int col);
 
-  void move(int rowA, int colA, int rowB, int colB);
-  void botMove(int botLevel, colour colour);
+  int move(int rowA, int colA, int rowB, int colB);
+  void botMove(int botLevel, Colour colour);
 
   
   //friend std::ostream &operator<<(std::ostream &out, const Grid &g);

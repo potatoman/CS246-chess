@@ -4,8 +4,8 @@
 #include <vector>
 //#include "textdisplay.h"
 
-enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King };
-enum class Colour { White, Black };
+enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King, None };
+enum class Colour { White, Black, None };
 
 class Cell {
   int r, c;
@@ -15,6 +15,7 @@ class Cell {
 
  public:
   Cell();  // Default constructor
+  Cell(PieceType piece, Colour colour, int r, int c);
   
   void remove();
   void add(PieceType piece, Colour colour);
