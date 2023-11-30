@@ -2,6 +2,7 @@
 #define __PIECE_H__
 #include <iostream>
 #include <vector>
+#include "Cell.h"
 //#include "textdisplay.h"
 
 enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King, None };
@@ -27,6 +28,7 @@ class Piece {
     int getCol();
     void updateMoves();
     void updateThreatStatus();
+    void updateCoords(int row, int col);
 
 };
 #endif

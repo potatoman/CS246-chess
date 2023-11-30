@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "grid.h"
+#include "Grid.h"
 using namespace std;
 
 PieceType findPiece (char piece) {

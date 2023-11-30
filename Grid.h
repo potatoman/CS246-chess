@@ -2,8 +2,8 @@
 #define __GRID_H__
 #include <iostream>
 #include <vector>
-#include "cell.h"
-#include "textdisplay.h"
+#include "Cell.h"
+#include "TextDisplay.h"
 
 enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King, None };
 enum class Colour { White, Black, None };
@@ -27,7 +27,7 @@ class Grid {
   bool movementCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB);
   bool checkCheckMate(Colour colour);
   bool stalemateCheck(Colour colour);
-  bool blockCheck();
+  bool blockCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB);
 
  public:
   Grid();

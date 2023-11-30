@@ -73,7 +73,7 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
     board[rowB][colB].add(piece, colour);
     board[rowA][rowA].remove();
     if (checkCheck(opColour)) {
-        if (checkcheckMate(colour)) {
+        if (checkCheckMate(colour)) {
             return 1;
         }
         //TODO - discuss if we want to return smth special for checking/output smth
@@ -87,7 +87,7 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
     if (movementCheck(piece, colour, rowA, colA, rowB, colB)) {
         return true;
     }
-    if (blockCheck()) {
+    if (blockCheck(piece, colour, rowA, colA, rowB, colB)) {
         return true;
     }
     PieceType pieceB = board[rowB][colB].getPieceType();
@@ -177,8 +177,93 @@ bool Grid::checkCheckMate(Colour colour) {
 
 }
 
-bool Grid::blockCheck() {
-
+bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB) {
+    if (piece == PieceType::Knight) {
+        //knight can't get blocked unless the spot its going to is occupied by ally
+        if (board[rowB][colB].getColour() == colour) {
+            return true;
+        }
+    } else if (piece == PieceType::Bishop) {
+        for (int i = 0; i < abs(rowA - rowB); i++) {
+            rowA++;
+            colA++;
+            if ((rowA == rowB && board[rowA][colA].getColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                return true;
+            }
+        }
+    } else if (piece == PieceType::Rook) {
+        if (colA == colB) { //for vertical movement
+            for (int i = 0; i < abs(rowA - rowB); i++) {
+                rowA++;
+                if ((rowA == rowB && board[rowA][colA].getColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                    return true;
+                }
+            }
+        } else { //for horizontal movement
+            for (int i = 0; i < abs(colA - colB); i++) {
+                colA++;
+                if ((colA == colB && board[rowA][colA].getColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                    return true;
+                }
+            }
+        }
+    } else if (piece == PieceType::Queen) {
+        if (colA == colB) { //for vertical movement
+            for (int i = 0; i < abs(rowA - rowB); i++) {
+                rowA++;
+                if ((rowA == rowB && board[rowA][colA].getColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                    return true;
+                }
+            }
+        } else if (rowA == rowB) { //for horizontal movement
+            for (int i = 0; i < abs(colA - colB); i++) {
+                colA++;
+                if ((colA == colB && board[rowA][colA].getColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                    return true;
+                }
+            }
+        } else { //for diagonal movement
+            for (int i = 0; i < abs(rowA - rowB); i++) {
+                rowA++;
+                colA++;
+                if ((rowA == rowB && board[rowA][colA].getColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                    return true;
+                }
+            }
+        }
+    } else if (piece == PieceType::King) {
+        if (colA - colB == 2) { //for castling
+            if (board[rowA][colA - 1].getPieceType() != PieceType::None) {
+                return true;
+            } else if (board[rowA][colB].getPieceType() != PieceType::None) {
+                return true;
+            }
+        } else if (colA - colB == -2) {
+            if (board[rowA][colA + 1].getPieceType() != PieceType::None) {
+                return true;
+            } else if (board[rowA][colB].getPieceType() != PieceType::None) {
+                return true;
+            }
+        } else { //for all other movements
+            if (board[rowB][colB].getColour() == colour) {
+                return true;
+            }
+        }
+    } else if (piece == PieceType::Pawn) {
+        if (colA != colB) { //for captures
+            if (board[rowB][colB].getColour() == colour) {
+                return true;
+            }
+        } else { //for regular movement, for loop so that it can also work for double move
+            for (int i = 0; i < abs(rowA - rowB); i++) {
+                rowA++;
+                if (board[rowA][colA].getPieceType() != PieceType::None) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 bool Grid::stalemateCheck(Colour colour) {
