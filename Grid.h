@@ -5,8 +5,8 @@
 #include "cell.h"
 #include "textdisplay.h"
 
-enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King };
-enum class Colour { White, Black };
+enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King, None };
+enum class Colour { White, Black, None };
 enum class BotLevel { Level1, Level2, Level3 };
 
 class Grid {
@@ -26,6 +26,7 @@ class Grid {
   bool checkCheck(Colour colour);
   bool movementCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB);
   bool checkCheckMate(Colour colour);
+  bool stalemateCheck(Colour colour);
   bool blockCheck();
 
  public:

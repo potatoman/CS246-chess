@@ -181,4 +181,8 @@ bool Grid::blockCheck() {
 
 }
 
+bool Grid::stalemateCheck(Colour colour) {
+    
+}
+
 void Grid::botMove(int botLevel, Colour colour) {}
