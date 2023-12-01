@@ -36,7 +36,7 @@ class Grid {
   
 
   void init();
-  void add(Colour colour, PieceType piece, int row, int col);
+  void add(Colour pieceColour, PieceType piece, int row, int col);
   void remove(int row, int col);
 
   int move(int rowA, int colA, int rowB, int colB);

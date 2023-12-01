@@ -20,7 +20,7 @@ class Cell {
   Cell(PieceType piece, Colour cellColour, Colour pieceColour, int r, int c);
   
   void remove();
-  void add(PieceType piece, Colour cellColour);
+  void add(PieceType piece, Colour pieceColour);
   PieceType getPieceType();
   Colour getPieceColour();
   Colour getCellColour();

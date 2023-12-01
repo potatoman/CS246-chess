@@ -25,9 +25,9 @@ void Grid::init() {
 
             if (row == 0 || row == 7) { //adds back lines
                 if (row == 0) {
-                    pieceColour = Colour::Black;
-                } else {
                     pieceColour = Colour::White;
+                } else {
+                    pieceColour = Colour::Black;
                 }
                 if (col == 1 || col == 6) {
                     piece = PieceType::Bishop;
@@ -41,16 +41,16 @@ void Grid::init() {
                     piece = PieceType::Rook;
                 }
                 
-                board[row][col] = Cell(piece, cellColour, pieceColour, row, col);
+                board[row][col] = Cell(piece, cellColour, pieceColour, 7 - row, col);
                 td->updateTD(board[row][col]);
             } else if (row == 1 || row == 6) { //adds pawn line
                 if (row == 1) {
-                    pieceColour = Colour::Black;
-                } else {
                     pieceColour = Colour::White;
+                } else {
+                    pieceColour = Colour::Black;
                 }
         
-                board[row][col] = Cell(PieceType::Pawn, cellColour, pieceColour, row, col);
+                board[row][col] = Cell(PieceType::Pawn, cellColour, pieceColour, 7 - row, col);
                 td->updateTD(board[row][col]);
             } else { // fills in board
                 
@@ -61,12 +61,15 @@ void Grid::init() {
     }
 }
 
-void Grid::add(Colour colour, PieceType piece, int row, int col) {
-    board[row][col].add(piece, colour);
+void Grid::add(Colour pieceColour, PieceType piece, int row, int col) {
+    board[row][col].add(piece, pieceColour);
+    td->updateTD(board[row][col]);
+    cout << "piece added" << endl;
 }
 
 void Grid::remove(int row, int col) {
     board[row][col].remove();
+    td->updateTD(board[row][col]);
 }
 
 int Grid::move(int rowA, int colA, int rowB, int colB) {

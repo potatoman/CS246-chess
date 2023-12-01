@@ -20,6 +20,14 @@ PieceType findPiece (char piece) {
     }
 }
 
+Colour findColour (char piece) {
+    if (piece > 97) {
+        return Colour::Black;
+    } else {
+        return Colour::White;
+    }
+}
+
 int findCol(char col) {
     col = toupper(col);
     if (col == 'A') {
@@ -46,7 +54,7 @@ int findCol(char col) {
 int main() {
     string cmd;
     Grid g;
-    Colour colour;
+    Colour colour = Colour::White;
 
     while(cin >> cmd) {
         if (cmd == "game") {
@@ -71,9 +79,10 @@ int main() {
             }
         } else if (cmd == "setup") {
             g.init();
-            cout << g;
+            //cout << g;
             string setupCommand;
             while (true) {
+                cout << g;
                 cin >> setupCommand;
                 if (setupCommand == "+") {
                     char tempPiece;
@@ -82,24 +91,21 @@ int main() {
                     int row, col;
                     cin >> tempPiece;
                     cin >> cell;
-                    tempPiece = toupper(tempPiece);
                     piece = findPiece(tempPiece);
                     col = findCol(cell[0]);
                     row = cell[1] - '0';
-                    g.add(colour, piece, row, col);
+                    colour = findColour(tempPiece);
+                    g.add(colour, piece, row - 1, col);
                 } else if (setupCommand == "-") {
                     string cell;
                     int row, col;
                     cin >> cell;
                     col = findCol(cell[0]);
                     row = cell[1] - '0';
-                    g.remove(row, col);
+
+                    g.remove(row - 1, col);
                 } else if (setupCommand == "=") {
-                    if (colour == Colour::White) {
-                        colour = Colour::Black;
-                    } else {
-                        colour = Colour::White;
-                    }
+                    
                 } else {
                     break;
                 }
