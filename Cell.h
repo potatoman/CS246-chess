@@ -8,19 +8,22 @@ enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King, None };
 enum class Colour { White, Black, None };
 
 class Cell {
-  int r, c;
   PieceType piece;
-  Colour colour;
-
+  Colour cellColour;
+  Colour pieceColour;
+  int r, c;
+  
 
  public:
   Cell();  // Default constructor
-  Cell(PieceType piece, Colour colour, int r, int c);
+  Cell(Colour cellColour, int r, int c);
+  Cell(PieceType piece, Colour cellColour, Colour pieceColour, int r, int c);
   
   void remove();
-  void add(PieceType piece, Colour colour);
+  void add(PieceType piece, Colour cellColour);
   PieceType getPieceType();
-  Colour getColour();
+  Colour getPieceColour();
+  Colour getCellColour();
   int getRow();
   int getCol();
 

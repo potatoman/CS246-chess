@@ -3,10 +3,24 @@
 #include "Cell.h"
 using namespace std;
 
-TextDisplay::TextDisplay(): theDisplay{8, std::vector<char>(8, '_')} { }
+TextDisplay::TextDisplay(): theDisplay{8, std::vector<char>(8, '_')} {
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      if ((j + i)%2 == 0) {
+        theDisplay[i][j] = ' ';
+      }
+    }
+  }
+ }
 
 void TextDisplay::updateTD(Cell &c) {
-  if (c.getColour() == Colour::White) {
+  /*if (c.getPieceType() == PieceType::None) {
+    cout << "should be none" << endl;
+  } else if (c.getPieceType() == PieceType::Rook) {
+    cout << "rook" << endl;
+  }*/
+
+  if (c.getPieceColour() == Colour::White) {
     if (c.getPieceType() == PieceType::Pawn) {
         theDisplay[c.getRow()][c.getCol()] = 'P';
     } else if (c.getPieceType() == PieceType::Bishop) {
@@ -20,7 +34,7 @@ void TextDisplay::updateTD(Cell &c) {
     } else {
         theDisplay[c.getRow()][c.getCol()] = 'K';
     }
-  } else if (c.getColour() == Colour::Black) {
+  } else if (c.getPieceColour() == Colour::Black) {
     if (c.getPieceType() == PieceType::Pawn) {
         theDisplay[c.getRow()][c.getCol()] = 'p';
     } else if (c.getPieceType() == PieceType::Bishop) {
@@ -35,7 +49,12 @@ void TextDisplay::updateTD(Cell &c) {
         theDisplay[c.getRow()][c.getCol()] = 'k';
     }
   } else {
-    theDisplay[c.getRow()][c.getCol()] = '_';
+      if (c.getCellColour() == Colour::Black) {
+        theDisplay[c.getRow()][c.getCol()] = '_';
+      } else {
+        theDisplay[c.getRow()][c.getCol()] = ' ';
+      }
+     // update to make shit blank or underlined
   }
 }
 
@@ -44,16 +63,16 @@ TextDisplay::~TextDisplay() {}
 
 
 ostream &operator<<(ostream &out, const TextDisplay &td) {
-  cout << "a b c d e f g";
+  
   for(int i = 0; i < 8; i++) {
-    cout << i;
+    cout << 8-i << " ";
     for(int j = 0; j < 8; j++) {
       out << td.theDisplay[i][j];
     }
-    if (i != 7) {
-      out << endl;
-    }
+    out << endl;
     
   }
+  out << endl;
+  out << "  abcdefgh";
   return out;
 }

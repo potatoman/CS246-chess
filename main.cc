@@ -4,7 +4,7 @@
 using namespace std;
 
 PieceType findPiece (char piece) {
-    toupper(piece);
+    piece = toupper(piece);
     if (piece == 'K') {
         return PieceType::King;
     } else if (piece == 'Q') {
@@ -15,11 +15,13 @@ PieceType findPiece (char piece) {
         return PieceType::Bishop;
     } else if (piece == 'R') {
         return PieceType::Rook;
+    } else {
+        return PieceType::None;
     }
 }
 
 int findCol(char col) {
-    toupper(col);
+    col = toupper(col);
     if (col == 'A') {
         return 0;
     } else if (col == 'B') {
@@ -36,6 +38,8 @@ int findCol(char col) {
         return 6;
     } else if (col == 'H') {
         return 7;
+    } else {
+        return 0;
     }
 }
 
@@ -66,6 +70,8 @@ int main() {
                 //end game
             }
         } else if (cmd == "setup") {
+            g.init();
+            cout << g;
             string setupCommand;
             while (true) {
                 cin >> setupCommand;
@@ -76,7 +82,7 @@ int main() {
                     int row, col;
                     cin >> tempPiece;
                     cin >> cell;
-                    toupper(tempPiece);
+                    tempPiece = toupper(tempPiece);
                     piece = findPiece(tempPiece);
                     col = findCol(cell[0]);
                     row = cell[1] - '0';

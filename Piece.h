@@ -5,8 +5,6 @@
 #include "Cell.h"
 //#include "textdisplay.h"
 
-enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King, None };
-enum class Colour { White, Black, None };
 
 class Piece {
     std::vector<Cell> cellsThreatening;

@@ -5,8 +5,7 @@
 #include "Cell.h"
 #include "TextDisplay.h"
 
-enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King, None };
-enum class Colour { White, Black, None };
+
 enum class BotLevel { Level1, Level2, Level3 };
 
 class Grid {
@@ -44,7 +43,7 @@ class Grid {
   void botMove(int botLevel, Colour colour);
 
   
-  //friend std::ostream &operator<<(std::ostream &out, const Grid &g);
+  friend std::ostream &operator<<(std::ostream &out, const Grid &g);
 };
 
 #endif
