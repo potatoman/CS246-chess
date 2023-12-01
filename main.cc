@@ -15,6 +15,8 @@ PieceType findPiece (char piece) {
         return PieceType::Bishop;
     } else if (piece == 'R') {
         return PieceType::Rook;
+    } else if (piece == 'P') {
+        return PieceType::Pawn;
     } else {
         return PieceType::None;
     }
@@ -69,14 +71,18 @@ int main() {
             colA = findCol(initialPos[0]);
             colB = findCol(endPos[0]);
             rowA = initialPos[1] - '0';
+            rowA -= 1;
             rowB = endPos[1] - '0';
+            rowB -= 1;
             if (rowA >= 8 || rowB >= 8 || colA >= 8 || colB >= 8) {
                 cout << "invalid coordinates" << endl;
                 continue;
             }
-            if (g.move(rowA, colA, rowB, colB) == 1) {
+            int result = g.move(rowA, colA, rowB, colB);
+            if (result == 1) {
                 //end game
             }
+            cout << g;
         } else if (cmd == "setup") {
             g.init();
             //cout << g;
