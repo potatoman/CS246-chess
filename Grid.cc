@@ -216,6 +216,8 @@ bool Grid::movementCheck(PieceType piece, Colour colour, int rowA, int colA, int
 bool Grid::checkCheckMate(Colour colour) { return false; }  // MUST WRITE
 
 bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB) {
+    int numOfSquaresRows = abs(rowA - rowB);
+    int numOfSquaresCols = abs(colA - colB);
     if (piece == PieceType::Knight) {
         //knight can't get blocked unless the spot its going to is occupied by ally
         cout << "knight block check" << endl;
@@ -224,7 +226,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
         }
     } else if (piece == PieceType::Bishop) {
         cout << "bishop block check" << endl;
-        for (int i = 0; i < abs(rowA - rowB); i++) {
+        for (int i = 0; i < numOfSquaresRows; i++) {
             if (rowA > rowB && colA > colB) {
                 rowA--;
                 colA--;
@@ -245,7 +247,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
     } else if (piece == PieceType::Rook) {
         cout << "rook block check" << endl;
         if (colA == colB) { //for vertical movement
-            for (int i = 0; i < abs(rowA - rowB); i++) {
+            for (int i = 0; i < numOfSquaresRows; i++) {
                 if (rowA > rowB) {
                     rowA--;
                 } else if (rowA < rowB) {
@@ -256,7 +258,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                 }
             }
         } else { //for horizontal movement
-            for (int i = 0; i < abs(colA - colB); i++) {
+            for (int i = 0; i < numOfSquaresCols; i++) {
                 if (colA > colB) {
                     colA--;
                 } else if (colA < colB) {
@@ -270,7 +272,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
     } else if (piece == PieceType::Queen) {
         cout << "queen block check" << endl;
         if (colA == colB) { //for vertical movement
-            for (int i = 0; i < abs(rowA - rowB); i++) {
+            for (int i = 0; i < numOfSquaresRows; i++) {
                 if (rowA > rowB) {
                     rowA--;
                 } else if (rowA < rowB) {
@@ -281,7 +283,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                 }
             }
         } else if (rowA == rowB) { //for horizontal movement
-            for (int i = 0; i < abs(colA - colB); i++) {
+            for (int i = 0; i < numOfSquaresCols; i++) {
                 if (colA > colB) {
                     colA--;
                 } else if (colA < colB) {
@@ -292,7 +294,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                 }
             }
         } else { //for diagonal movement
-            for (int i = 0; i < abs(rowA - rowB); i++) {
+            for (int i = 0; i < numOfSquaresRows; i++) {
                  if (rowA > rowB && colA > colB) {
                     rowA--;
                     colA--;
@@ -338,7 +340,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                 return true;
             }
         } else { //for regular movement, for loop so that it can also work for double move
-            for (int i = 0; i < abs(rowA - rowB); i++) {
+            for (int i = 0; i < numOfSquaresRows; i++) {
                 if (rowA > rowB) {
                     rowA--;
                 } else if (rowA < rowB) {
