@@ -3,11 +3,12 @@
 #include <iostream>
 #include <vector>
 #include "Cell.h"
+#include "Grid.h"
 //#include "textdisplay.h"
 
 
 class Piece {
-    std::vector<Cell> cellsThreatening;
+    std::vector<Cell*> cellsThreatening;
     int r, c;
     PieceType piece;
     Colour pieceColour;
@@ -21,10 +22,10 @@ class Piece {
   
 
     PieceType getPieceType();
-    Colour getColour();
+    Colour getPieceColour();
     int getRow();
     int getCol();
-    void updateMoves();
+    void updateCellsThreatening(Grid &g);
     void updateThreatStatus();
     void updateCoords(int row, int col);
 

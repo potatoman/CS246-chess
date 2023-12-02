@@ -4,12 +4,14 @@ using namespace std;
 
 
 
-Grid::Grid(): board{}, player1pieces{}, player2pieces{}, WKpos{nullptr}, BKpos{nullptr}, td{nullptr} {}
+Grid::Grid(): board{}, WhitePieces{}, BlackPieces{}, WKpos{nullptr}, BKpos{nullptr}, td{nullptr} {}
 
 
 Grid::~Grid() {}
 
+
 void Grid::init() {
+    
     board = std::vector<std::vector<Cell>>(8, std::vector<Cell>(8));
     td = new TextDisplay();
     Colour pieceColour = Colour::White;
@@ -62,14 +64,17 @@ void Grid::add(Colour pieceColour, PieceType piece, int row, int col) {
     board[row][col].add(piece, pieceColour);
     td->updateTD(board[row][col]);
     cout << "piece added" << endl;
+    // add to pieces vector
 }
 
 void Grid::remove(int row, int col) {
     board[row][col].remove();
     td->updateTD(board[row][col]);
+    // remove from pieces vector
 }
 
 int Grid::move(int rowA, int colA, int rowB, int colB) {
+    // update pieces locations and potentially remove from pieces vector if theres a capture
     PieceType piece = board[rowA][colA].getPieceType();
     Colour colour = board[rowA][colA].getPieceColour();
     cout << rowA << " " << colA << " " << rowB << " " << colB << endl;
@@ -116,11 +121,17 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
 bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int colB) {
     Colour colour = board[rowA][colA].getPieceColour();
     bool castled = false;
+    if (board[rowB][colB].getPieceColour() == board[rowA][colA].getPieceColour()) {
+        cout << "same piece colour at destination" << endl;
+        return false;
+    }
+
+
     if (!movementCheck(piece, colour, rowA, colA, rowB, colB)) {
         return false;
     }
     cout << "is a valid move" << endl;
-    if (blockCheck(piece, colour, rowA, colA, rowB, colB)) {
+    if (blockCheck2(rowA, colA, rowB, colB)) {
         return false;
     }
     cout << "is not being blocked" << endl;
@@ -182,9 +193,13 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
     return true;
 }
 
-bool Grid::checkCheck(Colour colour) { return false; } // WRITE
+bool Grid::checkCheck(Colour colour) { 
+    // check if king has underattack boolean set to true
+    return false; 
+} // WRITE
 
 bool Grid::movementCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB) {
+
     if (piece == PieceType::Rook) { 
         cout << "rook movement" << endl;
         if (rowA == rowB || colA == colB) { return true; } 
@@ -214,6 +229,38 @@ bool Grid::movementCheck(PieceType piece, Colour colour, int rowA, int colA, int
     return false;
 }
 bool Grid::checkCheckMate(Colour colour) { return false; }  // MUST WRITE
+
+bool Grid::blockCheck2(int rowA, int colA, int rowB, int colB) { // returns false if theres nothing blocking the move (no piece in between the coordinates)
+    cout << "called block check, rowA: " << rowA << " colA: " << colA << " rowB: " << rowB << " colB: " << colB << endl;
+    int rowIncrement;
+    int colIncrement;
+    
+    if (rowA == rowB) {
+        rowIncrement = 0;
+    } else {
+        rowIncrement = (rowB - rowA)/(abs(rowB - rowA));
+    }
+    if (colA == colB) {
+        colIncrement = 0;
+    } else {
+        colIncrement = (colB - colA)/(abs(colB - colA));
+    }
+
+    int rowStart = rowA + rowIncrement;
+    int colStart = colA + colIncrement;
+
+    while(rowStart != rowB || colStart != colB) {
+        if (board[rowStart][colStart].getPieceType() != PieceType::None) {
+            cout << "piece in the way at row" << rowStart << " and column: " << colStart  << endl;
+            return true;
+        }
+        rowStart += rowIncrement;
+        colStart += colIncrement;
+    }
+    
+    cout << "nothing in the way" << endl;
+    return false;
+}
 
 bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB) {
     int numOfSquaresRows = abs(rowA - rowB);

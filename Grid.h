@@ -4,14 +4,15 @@
 #include <vector>
 #include "Cell.h"
 #include "TextDisplay.h"
+#include "Piece.h"
 
 
 enum class BotLevel { Level1, Level2, Level3 };
 
 class Grid {
   std::vector<std::vector<Cell>> board;
-  std::vector<PieceType> player1pieces;
-  std::vector<PieceType> player2pieces;
+  std::vector<Piece> WhitePieces;
+  std::vector<Piece> BlackPieces;
   Cell *WKpos;
   Cell *BKpos;
   bool WKmoved, BKmoved, LWRmoved, RWRmoved, LBRmoved, RBRmoved = false;
@@ -27,6 +28,7 @@ class Grid {
   bool checkCheckMate(Colour colour);
   bool stalemateCheck(Colour colour);
   bool blockCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB);
+  
 
  public:
   Grid();
@@ -41,6 +43,7 @@ class Grid {
 
   int move(int rowA, int colA, int rowB, int colB);
   void botMove(int botLevel, Colour colour);
+  bool blockCheck2(int rowA, int colA, int rowB, int colB);
 
   
   friend std::ostream &operator<<(std::ostream &out, const Grid &g);
