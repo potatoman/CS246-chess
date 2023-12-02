@@ -11,7 +11,6 @@ Grid::~Grid() {}
 
 
 void Grid::init() {
-    
     board = std::vector<std::vector<Cell>>(8, std::vector<Cell>(8));
     td = new TextDisplay();
     Colour pieceColour = Colour::White;
@@ -43,6 +42,11 @@ void Grid::init() {
                     piece = PieceType::Rook;
                 }
                 board[row][col] = Cell(piece, cellColour, pieceColour, 7 - row, col);
+                if (pieceColour == Colour::White) {
+                    WhitePieces.emplace_back(Piece{piece, pieceColour, row, col});
+                } else {
+                    BlackPieces.emplace_back(Piece{piece, pieceColour, row, col});
+                }
                 td->updateTD(board[row][col]);
             } else if (row == 1 || row == 6) { //adds pawn line
                 if (row == 1) {
@@ -51,6 +55,11 @@ void Grid::init() {
                     pieceColour = Colour::Black;
                 }
                 board[row][col] = Cell(PieceType::Pawn, cellColour, pieceColour, 7 - row, col);
+                if (pieceColour == Colour::White) {
+                    WhitePieces.emplace_back(Piece{piece, pieceColour, row, col});
+                } else {
+                    BlackPieces.emplace_back(Piece{piece, pieceColour, row, col});
+                }
                 td->updateTD(board[row][col]);
             } else { // fills in board
                 board[row][col] = Cell(cellColour, 7 - row, col);
@@ -58,6 +67,10 @@ void Grid::init() {
             
         }
     }
+}
+
+Cell* Grid::findCell(int r, int c) {
+    return &board[r][c];
 }
 
 void Grid::add(Colour pieceColour, PieceType piece, int row, int col) {

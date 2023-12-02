@@ -5,7 +5,7 @@
 #include "Cell.h"
 #include "TextDisplay.h"
 #include "Piece.h"
-
+class Piece;
 
 enum class BotLevel { Level1, Level2, Level3 };
 
@@ -40,7 +40,7 @@ class Grid {
   void init();
   void add(Colour pieceColour, PieceType piece, int row, int col);
   void remove(int row, int col);
-
+  Cell* findCell(int r, int c);
   int move(int rowA, int colA, int rowB, int colB);
   void botMove(int botLevel, Colour colour);
   bool blockCheck2(int rowA, int colA, int rowB, int colB);

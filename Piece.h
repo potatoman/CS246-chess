@@ -5,7 +5,7 @@
 #include "Cell.h"
 #include "Grid.h"
 //#include "textdisplay.h"
-
+class Grid;
 
 class Piece {
     std::vector<Cell*> cellsThreatening;
