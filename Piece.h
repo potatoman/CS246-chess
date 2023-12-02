@@ -23,11 +23,15 @@ class Piece {
 
     PieceType getPieceType();
     Colour getPieceColour();
+    bool getThreatStatus();
+    void setThreatStatus(bool stat);
     int getRow();
     int getCol();
     void updateCellsThreatening(Grid &g);
-    void updateThreatStatus();
+    void updateThreatStatus(Grid &g);
+    
     void updateCoords(int row, int col);
+    bool checkThreat(int row, int col);
 
 };
 #endif

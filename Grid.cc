@@ -75,13 +75,44 @@ Cell* Grid::findCell(int r, int c) {
 
 void Grid::add(Colour pieceColour, PieceType piece, int row, int col) {
     board[row][col].add(piece, pieceColour);
+    if (board[row][col].getPieceType() != PieceType::None) { this->removePieceFromVector(row, col); }
+    this->addPieceToVector(pieceColour, piece, row, col);
     td->updateTD(board[row][col]);
     cout << "piece added" << endl;
     // add to pieces vector
 }
 
+void Grid::removePieceFromVector(int row, int col) {
+    int pos = 0;
+    for (auto i : WhitePieces) {
+        if (i.getRow() == row && i.getCol() == col) {
+            WhitePieces.erase(pos);
+            return;
+        }
+        pos++;
+    }
+    pos = 0;
+    for (auto i : BlackPieces) {
+        if (i.getRow() == row && i.getCol() == col) {
+            BlackPieces.erase(pos);
+            return;
+        }
+        pos++;
+    }
+}
+
+void Grid::addPieceToVector(Colour pieceColour, PieceType piece, int row, int col) {
+    if (pieceColour == Colour::White) {
+        WhitePieces.emplace_back(Piece{piece, pieceColour, row, col});
+    } else {
+        BlackPieces.emplace_back(Piece{piece, pieceColour, row, col});
+    }
+
+}
+
 void Grid::remove(int row, int col) {
     board[row][col].remove();
+    this->removePieceFromVector(row, col);
     td->updateTD(board[row][col]);
     // remove from pieces vector
 }
@@ -206,10 +237,28 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
     return true;
 }
 
-bool Grid::checkCheck(Colour colour) { 
+bool Grid::checkCheck(Colour colour) {  // return true if king is in check
+    if (colour == Colour::White) {
+        for (auto i : WhitePieces) {
+            if (i.getPieceType() == PieceType::King) {
+                if (i.getThreatStatus() == true) {
+                    return true;
+                } 
+                return false;
+            }
+        }
+    }
+    for (auto i : BlackPieces) {
+        if (i.getPieceType() == PieceType::King) {
+            if (i.getThreatStatus() == true) {
+                return true;
+            } 
+            return false;
+        }
+    }
     // check if king has underattack boolean set to true
     return false; 
-} // WRITE
+}
 
 bool Grid::movementCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB) {
 
@@ -418,6 +467,20 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
 bool Grid::stalemateCheck(Colour colour) { return true; } // MUST WRITE
 
 void Grid::botMove(int botLevel, Colour colour) { return; }
+
+int Grid::getNumOfPiece(Colour pieceColour) {
+    if (pieceColour == Colour::White) {
+        return WhitePieces.length();
+    }
+    return BlackPieces.length();
+}
+
+Piece* Grid::getPiece(Colour pieceColour, int index) {
+    if (pieceColour == Colour::White) {
+        return &WhitePieces[index];
+    }
+    return &BlackPieces[index];
+}
 
 ostream &operator<<(ostream &out, const Grid &g) {
   return out << *g.td << endl;

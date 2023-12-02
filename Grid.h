@@ -41,6 +41,8 @@ class Grid {
   void add(Colour pieceColour, PieceType piece, int row, int col);
   void remove(int row, int col);
   Cell* findCell(int r, int c);
+  int getNumOfPiece(Colour pieceColour);
+  Piece* getPiece(Colour pieceColour, int index);
   int move(int rowA, int colA, int rowB, int colB);
   void botMove(int botLevel, Colour colour);
   bool blockCheck2(int rowA, int colA, int rowB, int colB);
