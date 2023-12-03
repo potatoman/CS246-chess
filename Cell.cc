@@ -4,8 +4,8 @@ Cell::Cell(): piece{PieceType::None}, cellColour{Colour::None} {}
 Cell::Cell(Colour cellColour, int r, int c): piece{PieceType::None}, cellColour{cellColour}, pieceColour{Colour::None}, r{r}, c{c} {}
 Cell::Cell(PieceType piece, Colour cellColour, Colour pieceColour, int r, int c): piece{piece}, cellColour{cellColour}, pieceColour{pieceColour}, r{r}, c{c} {}
 
-void Cell::add(PieceType piece, Colour pieceColour) {
-    this->piece = piece;
+void Cell::add(PieceType pieceType, Colour pieceColour) {
+    this->piece = pieceType;
     this->pieceColour = pieceColour;
 }
 

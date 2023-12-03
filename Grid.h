@@ -28,7 +28,9 @@ class Grid {
   bool checkCheckMate(Colour colour);
   bool stalemateCheck(Colour colour);
   bool blockCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB);
-  
+  void removePieceFromVector(int row, int col);
+  void addPieceToVector(Colour pieceColour, PieceType piece, int row, int col);
+  void add(Colour pieceColour, int rowA, int colA, int rowB, int colB);
 
  public:
   Grid();
@@ -43,6 +45,7 @@ class Grid {
   Cell* findCell(int r, int c);
   int getNumOfPiece(Colour pieceColour);
   Piece* getPiece(Colour pieceColour, int index);
+  Piece getPiece(Colour pieceColour, int r, int c);
   int move(int rowA, int colA, int rowB, int colB);
   void botMove(int botLevel, Colour colour);
   bool blockCheck2(int rowA, int colA, int rowB, int colB);

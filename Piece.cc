@@ -29,9 +29,18 @@ int Piece::getCol() {
     return c;
 }
 
-void Piece::updateCellsThreatening(Grid &g) {
+void Piece::setCol(int c) {
+    this->c = c;
+}
+
+void Piece::setRow(int r) {
+    this->r = r;
+}
+
+void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece that just moved and every rook, bishop, queen both colours
     int currentCol;
     int currentRow;
+    cellsThreatening.clear();
     if (piece == PieceType::Pawn) {
         //threatening top left and top right (maybe bottom if its a black pawn)
         if (pieceColour == Colour::White) {
@@ -258,7 +267,7 @@ void Piece::updateCellsThreatening(Grid &g) {
     
 }
 
-void updateOpposingPieceThreatStatus(Grid &g, Colour attackingPieceColour, int r, int c) {
+void Piece::updateOpposingPieceThreatStatus(Grid &g, Colour attackingPieceColour, int r, int c) {
     Colour oppositeColour;
     if (attackingPieceColour == Colour::White) {
         oppositeColour = Colour::Black;
@@ -272,7 +281,7 @@ void updateOpposingPieceThreatStatus(Grid &g, Colour attackingPieceColour, int r
     }
 }
 
-bool checkThreat(int row, int col) { // checks if the cell at row, col is under threat by this piece
+bool Piece::checkThreat(int row, int col) { // checks if the cell at row, col is under threat by this piece
     for (auto i : cellsThreatening) {
         if (i->getRow() == row && i->getCol() == col) {
             return true;
@@ -280,7 +289,7 @@ bool checkThreat(int row, int col) { // checks if the cell at row, col is under 
     }
     return false;
 }
-void Piece::updateThreatStatus(Grid &g) {
+void Piece::updateThreatStatus(Grid &g) { //run after move on every piece that is under attack
     if (pieceColour == Colour::White) {
         for (int i = 0; i < g.getNumOfPiece(pieceColour); i++) {
             if (g.getPiece(Colour::Black, i)->checkThreat(r, c)) {
@@ -288,7 +297,6 @@ void Piece::updateThreatStatus(Grid &g) {
                 return;
             }
         }
-
     } else {
         for (int i = 0; i < g.getNumOfPiece(pieceColour); i++) {
             if (g.getPiece(Colour::White, i)->checkThreat(r, c)) {

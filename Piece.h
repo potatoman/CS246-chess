@@ -2,7 +2,6 @@
 #define __PIECE_H__
 #include <iostream>
 #include <vector>
-#include "Cell.h"
 #include "Grid.h"
 //#include "textdisplay.h"
 class Grid;
@@ -27,9 +26,11 @@ class Piece {
     void setThreatStatus(bool stat);
     int getRow();
     int getCol();
+    void setRow(int r);
+    void setCol(int c);
     void updateCellsThreatening(Grid &g);
     void updateThreatStatus(Grid &g);
-    
+    void updateOpposingPieceThreatStatus(Grid &g, Colour attackingPieceColour, int r, int c);
     void updateCoords(int row, int col);
     bool checkThreat(int row, int col);
 
