@@ -57,31 +57,93 @@ int main() {
     string cmd;
     Grid g;
     Colour colour = Colour::White;
+    bool gameStarted = false;
+    Colour whoseTurn = Colour::White;
+    enum class PlayerType { Human, Bot };
+    PlayerType whitePlayer;
+    PlayerType blackPlayer;
+    BotLevel whiteBot;
+    BotLevel blackBot;
 
     while(cin >> cmd) {
         if (cmd == "game") {
-            
+            string white;
+            string black;
+            cin >> white >> black;
+            toupper(white[0]);
+            toupper(black[0]);
+            if (white[0] == 'H') {
+                whitePlayer = PlayerType::Human;
+            } else if (black[0] == 'H') {
+                blackPlayer = PlayerType::Human;
+            } else if (white[0]) {
+                int length = 
+                for (int i = 0; i < )
+            }
         } else if (cmd == "move") {
             //TODO - add check to make sure they are moving their own pieces
-            int rowA, colA, rowB, colB;
-            string initialPos;
-            string endPos;
-            cin >> initialPos;
-            cin >> endPos;
-            colA = findCol(initialPos[0]);
-            colB = findCol(endPos[0]);
-            rowA = initialPos[1] - '0';
-            rowA -= 1;
-            rowB = endPos[1] - '0';
-            rowB -= 1;
-            if (rowA >= 8 || rowB >= 8 || colA >= 8 || colB >= 8) {
-                cout << "invalid coordinates" << endl;
-                continue;
+            if (!gameStarted) {
+                int rowA, colA, rowB, colB;
+                string initialPos;
+                string endPos;
+                cin >> initialPos;
+                cin >> endPos;
+                colA = findCol(initialPos[0]);
+                colB = findCol(endPos[0]);
+                rowA = initialPos[1] - '0';
+                rowA -= 1;
+                rowB = endPos[1] - '0';
+                rowB -= 1;
+                if (rowA >= 8 || rowB >= 8 || colA >= 8 || colB >= 8) {
+                    cout << "invalid coordinates" << endl;
+                    continue;
+                }
+                int result = g.move(rowA, colA, rowB, colB);
+                if (result == 1) {
+                    //end game
+                }
+            } else {
+                if ((whitePlayer == PlayerType::Human && whoseTurn == Colour::White) || 
+                (blackPlayer == PlayerType::Human && whoseTurn == Colour::Black)) {
+                    int rowA, colA, rowB, colB;
+                    string initialPos;
+                    string endPos;
+                    cin >> initialPos;
+                    cin >> endPos;
+                    colA = findCol(initialPos[0]);
+                    colB = findCol(endPos[0]);
+                    rowA = initialPos[1] - '0';
+                    rowA -= 1;
+                    rowB = endPos[1] - '0';
+                    rowB -= 1;
+                    if (rowA >= 8 || rowB >= 8 || colA >= 8 || colB >= 8) {
+                        cout << "invalid coordinates" << endl;
+                        continue;
+                    }
+                    if (g.findCell(rowA,colA)->getPieceColour() == whoseTurn) {
+                        int result = g.move(rowA, colA, rowB, colB);
+                        if (result == 1) {
+                            //end game
+                        }
+                        if (whoseTurn == Colour::White) {
+                            whoseTurn = Colour::Black;
+                        } else {
+                            whoseTurn = Colour::White;
+                        }
+                    } else {
+                        cout << "not your piece, try again" << endl;
+                    }
+                } else {
+                    if (whoseTurn == Colour::White) {
+                        g.botMove(whiteBot, whoseTurn);
+                        whoseTurn = Colour::Black;
+                    } else {
+                        g.botMove(blackBot, whoseTurn);
+                        whoseTurn = Colour::White;
+                    }
+                }
             }
-            int result = g.move(rowA, colA, rowB, colB);
-            if (result == 1) {
-                //end game
-            }
+            
             cout << g;
         } else if (cmd == "setup") {
             g.init();
@@ -111,7 +173,14 @@ int main() {
 
                     g.remove(row - 1, col);
                 } else if (setupCommand == "=") {
-                    
+                    string colour;
+                    cin >> colour;
+                    toupper(colour[0]);
+                    if (colour[0] == 'W') {
+                        whoseTurn = Colour::White;
+                    } else if (colour[0]) {
+                        whoseTurn = Colour::Black;
+                    }
                 } else {
                     break;
                 }

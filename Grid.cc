@@ -572,7 +572,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
 
 bool Grid::stalemateCheck(Colour colour) { return true; } // MUST WRITE
 
-void Grid::botMove(int botLevel, Colour colour) { return; }
+void Grid::botMove(BotLevel botLevel, Colour colour) { return; }
 
 int Grid::getNumOfPiece(Colour pieceColour) {
     if (pieceColour == Colour::White) {

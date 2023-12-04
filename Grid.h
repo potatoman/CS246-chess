@@ -51,7 +51,7 @@ class Grid {
   Piece* getPiece(Colour pieceColour, int index);
   Piece* getPiece(Colour pieceColour, int r, int c);
   int move(int rowA, int colA, int rowB, int colB);
-  void botMove(int botLevel, Colour colour);
+  void botMove(BotLevel botLevel, Colour colour);
   bool blockCheck2(int rowA, int colA, int rowB, int colB);
 
   
