@@ -6,7 +6,7 @@ using namespace std;
 TextDisplay::TextDisplay(): theDisplay{8, std::vector<char>(8, '_')} {
   for (int i = 0; i < 8; i++) {
     for (int j = 0; j < 8; j++) {
-      if ((j + i)%2 == 0) {
+      if ((j + i)%2 != 0) {
         theDisplay[i][j] = ' ';
       }
     }
@@ -64,8 +64,8 @@ TextDisplay::~TextDisplay() {}
 
 ostream &operator<<(ostream &out, const TextDisplay &td) {
   
-  for(int i = 0; i < 8; i++) {
-    cout << 8-i << " ";
+  for(int i = 7; i >= 0; i--) {
+    cout << i+1 << " ";
     for(int j = 0; j < 8; j++) {
       out << td.theDisplay[i][j];
     }

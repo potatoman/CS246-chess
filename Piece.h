@@ -8,9 +8,9 @@ class Grid;
 
 class Piece {
     std::vector<Cell*> cellsThreatening;
-    int r, c;
     PieceType piece;
     Colour pieceColour;
+    int r, c;
     bool underAttack;
 
 

@@ -2,6 +2,7 @@
 #include "Grid.h"
 
 Piece::Piece(PieceType piece, Colour colour, int r, int c): piece{piece}, pieceColour{colour}, r{r}, c{c}, underAttack{false} {}
+Piece::Piece() {}
 
 PieceType Piece::getPieceType() {
     return piece;

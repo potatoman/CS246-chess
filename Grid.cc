@@ -41,7 +41,7 @@ void Grid::init() {
                 } else if (col == 0 || col == 7) {
                     piece = PieceType::Rook;
                 }
-                board[row][col] = Cell(piece, cellColour, pieceColour, 7 - row, col);
+                board[row][col] = Cell(piece, cellColour, pieceColour, row, col);
                 if (pieceColour == Colour::White) {
                     WhitePieces.emplace_back(Piece{piece, pieceColour, row, col});
                 } else {
@@ -55,7 +55,7 @@ void Grid::init() {
                 } else {
                     pieceColour = Colour::Black;
                 }
-                board[row][col] = Cell(piece, cellColour, pieceColour, 7 - row, col);
+                board[row][col] = Cell(piece, cellColour, pieceColour, row, col);
                 if (pieceColour == Colour::White) {
                     WhitePieces.emplace_back(Piece{piece, pieceColour, row, col});
                 } else {
@@ -63,7 +63,7 @@ void Grid::init() {
                 }
                 td->updateTD(board[row][col]);
             } else { // fills in board
-                board[row][col] = Cell(cellColour, 7 - row, col);
+                board[row][col] = Cell(cellColour, row, col);
             }
             
         }
@@ -75,10 +75,15 @@ Cell* Grid::findCell(int r, int c) {
 }
 
 void Grid::add(Colour pieceColour, int rowA, int colA, int rowB, int colB) {
-    getPiece(pieceColour, rowA, colA).setCol(colB);
-    getPiece(pieceColour, rowA, colA).setRow(rowB);
-    PieceType pieceType = getPiece(pieceColour, rowA, colA).getPieceType();
+    if (board[rowB][colB].getPieceType() != PieceType::None) { this->removePieceFromVector(rowB, colB); }
+    PieceType pieceType = getPiece(pieceColour, rowA, colA)->getPieceType();
+    getPiece(pieceColour, rowA, colA)->updateCoords(rowB, colB);
+    //cout << "we got to here 4" << endl;
+    //getPiece(pieceColour, rowA, colB)->setRow(rowB);
+    //cout << "we got to here 5" << endl;
     board[rowB][colB].add(pieceType, pieceColour);
+    board[rowA][colA].remove();
+    
 }
 
 void Grid::add(Colour pieceColour, PieceType piece, int row, int col) {
@@ -111,12 +116,22 @@ void Grid::removePieceFromVector(int row, int col) {
 
 void Grid::addPieceToVector(Colour pieceColour, PieceType piece, int row, int col) {
     if (pieceColour == Colour::White) {
-        WhitePieces.emplace_back(Piece{piece, pieceColour, row, col});
+        WhitePieces.emplace_back(Piece{piece, pieceColour, 7 - row, col});
     } else {
-        BlackPieces.emplace_back(Piece{piece, pieceColour, row, col});
+        BlackPieces.emplace_back(Piece{piece, pieceColour, 7 - row, col});
     }
 
 }
+
+void Grid::addPieceToVector(Piece piece) {
+    if (piece.getPieceColour() == Colour::White) {
+        WhitePieces.emplace_back(piece);
+    } else {
+        BlackPieces.emplace_back(piece);
+    }
+}
+
+
 
 void Grid::remove(int row, int col) {
     board[row][col].remove();
@@ -129,16 +144,22 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
     // update pieces locations and potentially remove from pieces vector if theres a capture
     PieceType piece = board[rowA][colA].getPieceType();
     Colour colour = board[rowA][colA].getPieceColour();
-    cout << rowA << " " << colA << " " << rowB << " " << colB << endl;
+    //cout << rowA << " " << colA << " " << rowB << " " << colB << endl;
     Colour opColour = Colour::White;
     if (colour == Colour::White) {
         opColour = Colour::Black;
     }
     
-    if (rowA == rowB && colA == colB) { return 3; }
-    cout << "not same" << endl;
-    if(!legalMoveCheck(piece, rowA, colA, rowB, colB)) { return 3; }
-    cout << "legal move" << endl;
+    if (rowA == rowB && colA == colB) { 
+        cout << "you are trying to move to the square you are already in" << endl;
+        return 3; 
+    }
+    
+    if(!legalMoveCheck(piece, rowA, colA, rowB, colB)) { 
+        cout << "not a legal move" << endl;
+        return 3; 
+    }
+    
     //TODO - what does the Wking || Bking check do?
     if (piece == PieceType::Rook && (!LWRmoved || !RWRmoved || !LBRmoved || !RBRmoved)) {
         if (rowA == 0) {
@@ -155,43 +176,37 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
             }
         }
     }
+
     //TODO - promotioncheck()
+    
     this->add(colour, rowA, colA, rowB, colB);
-    board[rowA][colA].remove();
-    int length = WhitePieces.size();
-    for (int i = 0; i < length; i++) {
-        if ((WhitePieces[i].getCol() == colB && WhitePieces[i].getRow() == rowB) || WhitePieces[i].getPieceType() == PieceType::Bishop ||
-        WhitePieces[i].getPieceType() == PieceType::Rook || WhitePieces[i].getPieceType() == PieceType::Queen) {
-            WhitePieces[i].updateCellsThreatening(*this);
-        }
-        if (WhitePieces[i].getThreatStatus() == true) {
-            WhitePieces[i].updateThreatStatus(*this);
-        }
-    }
-    length = BlackPieces.size();
-    for (int i = 0; i < length; i++) {
-        if ((BlackPieces[i].getCol() == colB && BlackPieces[i].getRow() == rowB) || BlackPieces[i].getPieceType() == PieceType::Bishop ||
-        BlackPieces[i].getPieceType() == PieceType::Rook || BlackPieces[i].getPieceType() == PieceType::Queen) {
-            BlackPieces[i].updateCellsThreatening(*this);
-        }
-        if (BlackPieces[i].getThreatStatus() == true) {
-            BlackPieces[i].updateThreatStatus(*this);
-        }
-    }
+
+    this->updateAllThreats(rowB, colB);
+    td->updateTD(board[rowA][colA]);
+    td->updateTD(board[rowB][colB]);
+
     if (checkCheck(opColour)) {
-        if (checkCheckMate(colour)) {
+        cout << "opponent is in check" << endl;
+        if (checkCheckMate(opColour)) {
             return 1;
         }
         //TODO - discuss if we want to return smth special for checking/output smth
     }
-    cout << "opposite side is not in check" << endl;
-    td->updateTD(board[rowA][colA]);
-    td->updateTD(board[rowB][colB]);
+    //cout << "opposite side is not in check" << endl;
     return 0;
 }
 
+
 bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int colB) {
+    Piece taken;
+    bool capture = false;
+    if (board[rowB][colB].getPieceType() != PieceType::None) {
+        taken = Piece{board[rowB][colB].getPieceType(), board[rowB][colB].getPieceColour(), rowB, colB};
+        capture = true;
+    }
     Colour colour = board[rowA][colA].getPieceColour();
+
+
     bool castled = false;
     if (board[rowB][colB].getPieceColour() == board[rowA][colA].getPieceColour()) {
         cout << "same piece colour at destination" << endl;
@@ -200,13 +215,19 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
 
 
     if (!movementCheck(piece, colour, rowA, colA, rowB, colB)) {
+        cout << "the piece you are trying to move cannot move like that" << endl;
         return false;
     }
-    cout << "is a valid move" << endl;
-    if (blockCheck2(rowA, colA, rowB, colB)) {
-        return false;
+
+    if (piece != PieceType::Knight) {
+        if (blockCheck2(rowA, colA, rowB, colB)) {
+            cout << "there is a piece blocking the path" << endl;
+            return false;
+        }
     }
-    cout << "is not being blocked" << endl;
+
+    
+
     //PieceType pieceB = board[rowB][colB].getPieceType();
     if (piece == PieceType::King) {
         //checking castle
@@ -245,29 +266,12 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
         }
         WKpos = &board[rowB][colB];
     } else {
+        
         this->add(colour, rowA, colA, rowB, colB);
-        board[rowA][colA].remove();
     }
-    int length = WhitePieces.size();
-    for (int i = 0; i < length; i++) {
-        if ((WhitePieces[i].getCol() == colB && WhitePieces[i].getRow() == rowB) || WhitePieces[i].getPieceType() == PieceType::Bishop ||
-        WhitePieces[i].getPieceType() == PieceType::Rook || WhitePieces[i].getPieceType() == PieceType::Queen) {
-            WhitePieces[i].updateCellsThreatening(*this);
-        }
-        if (WhitePieces[i].getThreatStatus() == true) {
-            WhitePieces[i].updateThreatStatus(*this);
-        }
-    }
-    length = BlackPieces.size();
-    for (int i = 0; i < length; i++) {
-        if ((BlackPieces[i].getCol() == colB && BlackPieces[i].getRow() == rowB) || BlackPieces[i].getPieceType() == PieceType::Bishop ||
-        BlackPieces[i].getPieceType() == PieceType::Rook || BlackPieces[i].getPieceType() == PieceType::Queen) {
-            BlackPieces[i].updateCellsThreatening(*this);
-        }
-        if (BlackPieces[i].getThreatStatus() == true) {
-            BlackPieces[i].updateThreatStatus(*this);
-        }
-    }
+
+    
+    this->updateAllThreats(rowB, colB);
     if (checkCheck(colour)) {
         if (castled) {
             if (colB == 6) {
@@ -278,11 +282,51 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
                 board[rowA][3].remove();
             }
         }
-        this->add(colour, rowA, colA, rowB, colB);
-        board[rowB][colB].remove();
+        this->add(colour, rowB, colB, rowA, colA);
+        if (capture) {
+            board[rowB][colB].add(taken.getPieceType(), taken.getPieceColour());
+            this->addPieceToVector(taken);
+            updateAllThreats(rowB, colB);
+        }
+        
+        updateAllThreats(rowA, colA);
+        
+        cout << "this move puts you in check so it is not legal" << endl;
+        return false;
     }
-    cout << "is not in check" << endl;
+
+
+    this->add(colour, rowB, colB, rowA, colA);
+    if (capture) {
+        board[rowB][colB].add(taken.getPieceType(), taken.getPieceColour());
+        this->addPieceToVector(taken);
+        updateAllThreats(rowB, colB);
+    }
+    updateAllThreats(rowA, colA);
     return true;
+}
+
+void Grid::updateAllThreats(int row, int col) {
+    int length = WhitePieces.size();
+    for (int i = 0; i < length; i++) {
+        if ((WhitePieces[i].getCol() == col && WhitePieces[i].getRow() == row) || WhitePieces[i].getPieceType() == PieceType::Bishop ||
+        WhitePieces[i].getPieceType() == PieceType::Rook || WhitePieces[i].getPieceType() == PieceType::Queen) {
+            WhitePieces[i].updateCellsThreatening(*this);
+        }
+        if (WhitePieces[i].getThreatStatus() == true) {
+            WhitePieces[i].updateThreatStatus(*this);
+        }
+    }
+    length = BlackPieces.size();
+    for (int i = 0; i < length; i++) {
+        if ((BlackPieces[i].getCol() == col && BlackPieces[i].getRow() == row) || BlackPieces[i].getPieceType() == PieceType::Bishop ||
+        BlackPieces[i].getPieceType() == PieceType::Rook || BlackPieces[i].getPieceType() == PieceType::Queen) {
+            BlackPieces[i].updateCellsThreatening(*this);
+        }
+        if (BlackPieces[i].getThreatStatus() == true) {
+            BlackPieces[i].updateThreatStatus(*this);
+        }
+    }
 }
 
 bool Grid::checkCheck(Colour colour) {  // return true if king is in check
@@ -530,19 +574,24 @@ Piece* Grid::getPiece(Colour pieceColour, int index) {
     return &BlackPieces[index];
 }
 
-Piece Grid::getPiece(Colour pieceColour, int r, int c) {
+Piece* Grid::getPiece(Colour pieceColour, int r, int c) {
     int length = WhitePieces.size();
+    cout << length << endl;
+    cout << "got here 1" << endl;
     if (pieceColour == Colour::White) {
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length - 1; i++) {
             if (WhitePieces[i].getCol() == c && WhitePieces[i].getRow() == r) {
-                return WhitePieces[i];
+                cout << "got here 2" << endl;
+                return &WhitePieces[i];
             }
         }
     } else {
+        cout << "got here why??" << endl;
         length = BlackPieces.size();
-        for (int i = 0; i < length; i++) {
+        cout << length << endl;
+        for (int i = 0; i < length - 1; i++) {
             if (BlackPieces[i].getCol() == c && BlackPieces[i].getRow() == r) {
-                return BlackPieces[i];
+                return &BlackPieces[i];
             }
         }
     }
