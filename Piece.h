@@ -26,6 +26,7 @@ class Piece {
     void setThreatStatus(bool stat);
     int getRow();
     int getCol();
+    std::vector<Cell*> * getCellsThreatening();
     void setRow(int r);
     void setCol(int c);
     void updateCellsThreatening(Grid &g);
@@ -33,6 +34,7 @@ class Piece {
     void updateOpposingPieceThreatStatus(Grid &g, Colour attackingPieceColour, int r, int c);
     void updateCoords(int row, int col);
     bool checkThreat(int row, int col);
+    
 
 };
 #endif
