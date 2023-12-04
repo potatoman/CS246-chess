@@ -8,7 +8,7 @@
 #include "window.h"
 class Piece;
 
-enum class BotLevel { Level1, Level2, Level3 };
+enum class BotLevel { Level1, Level2, Level3, Level4 };
 
 class Grid {
   std::vector<std::vector<Cell>> board;

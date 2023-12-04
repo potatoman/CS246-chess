@@ -64,6 +64,8 @@ int main() {
     PlayerType blackPlayer;
     BotLevel whiteBot;
     BotLevel blackBot;
+    int whiteScore = 0;
+    int blackScore = 0;
 
     while(cin >> cmd) {
         if (cmd == "game") {
@@ -76,9 +78,32 @@ int main() {
                 whitePlayer = PlayerType::Human;
             } else if (black[0] == 'H') {
                 blackPlayer = PlayerType::Human;
-            } else if (white[0]) {
-                int length = 
-                for (int i = 0; i < )
+            } else if (white[0] == 'C') {
+                int length = white.length();
+                for (int i = 0; i < length; i++) {
+                    if (white[i] == '1') {
+                        whiteBot = BotLevel::Level1;
+                    } else if (white[i] == '2') {
+                        whiteBot = BotLevel::Level2;
+                    } else if (white[i] == '3') {
+                        whiteBot = BotLevel::Level3;
+                    } else if (white[i] == '4') {
+                        whiteBot = BotLevel::Level4;
+                    }
+                }
+            } else if (black[0] == 'C') {
+                int length = black.length();
+                for (int i = 0; i < length; i++) {
+                    if (black[i] == '1') {
+                        blackBot = BotLevel::Level1;
+                    } else if (black[i] == '2') {
+                        blackBot = BotLevel::Level2;
+                    } else if (black[i] == '3') {
+                        blackBot = BotLevel::Level3;
+                    } else if (black[i] == '4') {
+                        blackBot = BotLevel::Level4;
+                    }
+                }
             }
         } else if (cmd == "move") {
             //TODO - add check to make sure they are moving their own pieces
@@ -123,7 +148,12 @@ int main() {
                     if (g.findCell(rowA,colA)->getPieceColour() == whoseTurn) {
                         int result = g.move(rowA, colA, rowB, colB);
                         if (result == 1) {
-                            //end game
+                            gameStarted = false;
+                            if (whoseTurn == Colour::White) {
+                                whiteScore += 1;
+                            } else {
+                                blackScore += 1;
+                        }
                         }
                         if (whoseTurn == Colour::White) {
                             whoseTurn = Colour::Black;
@@ -189,5 +219,7 @@ int main() {
 
         }
     }
-
+    cout << "Final Score:" << endl;
+    cout << "White: " << whiteScore << endl;
+    cout << "Black: " << blackScore << endl;
 }
