@@ -1,7 +1,7 @@
 #include "Cell.h"
 
-Cell::Cell(): piece{PieceType::None}, cellColour{Colour::None} {}
-Cell::Cell(Colour cellColour, int r, int c): piece{PieceType::None}, cellColour{cellColour}, pieceColour{Colour::None}, r{r}, c{c} {}
+Cell::Cell(): piece{PieceType::NONE}, cellColour{Colour::None} {}
+Cell::Cell(Colour cellColour, int r, int c): piece{PieceType::NONE}, cellColour{cellColour}, pieceColour{Colour::None}, r{r}, c{c} {}
 Cell::Cell(PieceType piece, Colour cellColour, Colour pieceColour, int r, int c): piece{piece}, cellColour{cellColour}, pieceColour{pieceColour}, r{r}, c{c} {}
 
 void Cell::add(PieceType pieceType, Colour pieceColour) {
@@ -10,7 +10,7 @@ void Cell::add(PieceType pieceType, Colour pieceColour) {
 }
 
 void Cell::remove() {
-    piece = PieceType::None;
+    piece = PieceType::NONE;
     pieceColour = Colour::None;
 }
 

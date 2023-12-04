@@ -47,26 +47,26 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
         if (pieceColour == Colour::White) {
             if (c != 0) {
                 cellsThreatening.emplace_back(g.findCell(r+1, c-1));  
-                if (g.findCell(r+1, c-1)->getPieceType() != PieceType::None) { 
+                if (g.findCell(r+1, c-1)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, r+1, c-1); 
                 }  
             }
             if (c != 7) {
                 cellsThreatening.emplace_back(g.findCell(r+1, c+1));
-                if (g.findCell(r+1, c+1)->getPieceType() != PieceType::None) { 
+                if (g.findCell(r+1, c+1)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, r+1, c+1); 
                 }  
             }
         } else {
             if (c != 0) {
                 cellsThreatening.emplace_back(g.findCell(r-1, c-1));
-                if (g.findCell(r-1, c-1)->getPieceType() != PieceType::None) { 
+                if (g.findCell(r-1, c-1)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, r-1, c-1); 
                 }  
             }
             if (c != 7) {
                 cellsThreatening.emplace_back(g.findCell(r-1, c+1));
-                if (g.findCell(r-1, c+1)->getPieceType() != PieceType::None) { 
+                if (g.findCell(r-1, c+1)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, r-1, c+1); 
                 }  
             }
@@ -74,25 +74,25 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
     } else if (piece == PieceType::Rook || piece == PieceType::Queen || piece == PieceType::King) { 
             if (r != 0) {
                 cellsThreatening.emplace_back(g.findCell(r-1, c));
-                if (g.findCell(r-1, c)->getPieceType() != PieceType::None) { 
+                if (g.findCell(r-1, c)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, r-1, c); 
                 }
             }
             if (r != 7) {
                 cellsThreatening.emplace_back(g.findCell(r+1, c));
-                if (g.findCell(r+1, c)->getPieceType() != PieceType::None) { 
+                if (g.findCell(r+1, c)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, r+1, c); 
                 }
             }
             if (c != 0) {
                 cellsThreatening.emplace_back(g.findCell(r, c-1));
-                if (g.findCell(r, c-1)->getPieceType() != PieceType::None) { 
+                if (g.findCell(r, c-1)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, r, c-1); 
                 }
             }
             if (c != 7) {
                 cellsThreatening.emplace_back(g.findCell(r, c+1));
-                if (g.findCell(r, c+1)->getPieceType() != PieceType::None) { 
+                if (g.findCell(r, c+1)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, r, c+1); 
                 }
             }
@@ -103,7 +103,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
                 while (currentCol >= 0 && !g.blockCheck2(r, c, r, currentCol)) {
                     // add cell at [r][currentCol] to the vector
                     cellsThreatening.emplace_back(g.findCell(r, currentCol));
-                    if (g.findCell(r, currentCol)->getPieceType() != PieceType::None) { 
+                    if (g.findCell(r, currentCol)->getPieceType() != PieceType::NONE) { 
                         updateOpposingPieceThreatStatus(g, pieceColour, r, currentCol); 
                     }
                     currentCol-=1;
@@ -112,7 +112,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
                 while (currentCol <= 7 && !g.blockCheck2(r, c, r, currentCol)) {
                     // add cell at [r][currentCol] to the vector
                     cellsThreatening.emplace_back(g.findCell(r, currentCol));
-                    if (g.findCell(r, currentCol)->getPieceType() != PieceType::None) { 
+                    if (g.findCell(r, currentCol)->getPieceType() != PieceType::NONE) { 
                         updateOpposingPieceThreatStatus(g, pieceColour, r, currentCol); 
                     }
                     currentCol+=1;
@@ -122,7 +122,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
                 while (currentRow <= 7 && !g.blockCheck2(r, c, currentRow, c)) {
                     // add cell at [currentRow][c] to the vector
                     cellsThreatening.emplace_back(g.findCell(currentRow, c));
-                    if (g.findCell(currentRow, c)->getPieceType() != PieceType::None) { 
+                    if (g.findCell(currentRow, c)->getPieceType() != PieceType::NONE) { 
                         updateOpposingPieceThreatStatus(g, pieceColour, currentRow, c); 
                     }
                     currentRow+=1;
@@ -131,7 +131,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
                 while (currentRow >= 0 && !g.blockCheck2(r, c, currentRow, c)) {
                     // add cell at [currentRow][c] to the vector
                     cellsThreatening.emplace_back(g.findCell(currentRow, c));
-                    if (g.findCell(currentRow, c)->getPieceType() != PieceType::None) { 
+                    if (g.findCell(currentRow, c)->getPieceType() != PieceType::NONE) { 
                         updateOpposingPieceThreatStatus(g, pieceColour, currentRow, c); 
                     }
                     currentRow-=1;
@@ -141,49 +141,49 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
     } else if (piece == PieceType::Knight) {
         if (r + 1 <= 7 && c + 2 <= 7) { 
             cellsThreatening.emplace_back(g.findCell(r+1, c+2)); 
-            if (g.findCell(r+1, c+2)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r+1, c+2)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r+1, c+2); 
             }
         }
         if (r + 1 <= 7 && c - 2 >= 0) { 
             cellsThreatening.emplace_back(g.findCell(r+1, c-2)); 
-            if (g.findCell(r+1, c-2)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r+1, c-2)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r+1, c-2); 
             }
         }
         if (r - 1 >= 0 && c + 2 <= 7) { 
             cellsThreatening.emplace_back(g.findCell(r-1, c+2)); 
-            if (g.findCell(r-1, c+2)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r-1, c+2)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r-1, c+2); 
             }
         }
         if (r - 1 >= 0 && c - 2 >= 0) { 
             cellsThreatening.emplace_back(g.findCell(r-1, c-2)); 
-            if (g.findCell(r-1, c-2)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r-1, c-2)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r-1, c-2); 
             }
         }
         if (r - 2 >= 0 && c + 1 <= 7) { 
             cellsThreatening.emplace_back(g.findCell(r-2, c+1)); 
-            if (g.findCell(r-2, c+1)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r-2, c+1)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r-2, c+1); 
             }
         }
         if (r - 2 >= 0 && c - 1 >= 0) { 
             cellsThreatening.emplace_back(g.findCell(r-2, c-1)); 
-            if (g.findCell(r-2, c-1)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r-2, c-1)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r-2, c-1); 
             }
         }
         if (r + 2 <= 7 && c + 1 <= 7) { 
             cellsThreatening.emplace_back(g.findCell(r+2, c+1)); 
-            if (g.findCell(r+2, c+1)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r+2, c+1)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r+2, c+1); 
             }
         }
         if (r + 2 <= 7 && c - 1 >= 0) { 
             cellsThreatening.emplace_back(g.findCell(r+2, c-1)); 
-            if (g.findCell(r+2, c-1)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r+2, c-1)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r+2, c-1); 
             }
         }
@@ -192,25 +192,25 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
         // add first one in each direction
         if (r != 0 && c != 0) {
             cellsThreatening.emplace_back(g.findCell(r-1, c-1));
-            if (g.findCell(r-1, c-1)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r-1, c-1)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r-1, c-1); 
             }
         }
         if (r != 0 && c != 7) {
             cellsThreatening.emplace_back(g.findCell(r-1, c+1));
-            if (g.findCell(r-1, c+1)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r-1, c+1)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r-1, c+1); 
             }
         }
         if (r != 7 && c != 0) {
             cellsThreatening.emplace_back(g.findCell(r+1, c-1));
-            if (g.findCell(r+1, c-1)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r+1, c-1)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r+1, c-1); 
             }
         }
         if (r != 7 && c != 7) {
             cellsThreatening.emplace_back(g.findCell(r+1, c+1));
-            if (g.findCell(r+1, c+1)->getPieceType() != PieceType::None) { 
+            if (g.findCell(r+1, c+1)->getPieceType() != PieceType::NONE) { 
                 updateOpposingPieceThreatStatus(g, pieceColour, r+1, c+1); 
             }
         }
@@ -220,7 +220,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
             while (currentRow <= 7 && currentCol <= 7 && !g.blockCheck2(r, c, currentRow, currentCol)) {
                 // add cell to vector
                 cellsThreatening.emplace_back(g.findCell(currentRow, currentCol));
-                if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::None) { 
+                if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, currentRow, currentCol); 
                 }
                 currentRow++;
@@ -232,7 +232,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
             while (currentRow <= 7 && currentCol >= 0 && !g.blockCheck2(r, c, currentRow, currentCol)) {
                 // add cell to vector
                 cellsThreatening.emplace_back(g.findCell(currentRow, currentCol));
-                if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::None) { 
+                if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, currentRow, currentCol); 
                 }
                 currentRow++;
@@ -244,7 +244,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
             while (currentRow >= 0 && currentCol <= 7 && !g.blockCheck2(r, c, currentRow, currentCol)) {
                 // add cell to vector
                 cellsThreatening.emplace_back(g.findCell(currentRow, currentCol));
-                if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::None) { 
+                if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, currentRow, currentCol); 
                 }
                 currentRow--;
@@ -256,7 +256,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
             while (currentRow >= 0 && currentCol >= 0 && !g.blockCheck2(r, c, currentRow, currentCol)) {
                 // add cell to vector
                 cellsThreatening.emplace_back(g.findCell(currentRow, currentCol));
-                if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::None) { 
+                if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, currentRow, currentCol); 
                 }
                 currentRow--;

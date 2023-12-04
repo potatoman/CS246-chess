@@ -18,7 +18,7 @@ PieceType findPiece (char piece) {
     } else if (piece == 'P') {
         return PieceType::Pawn;
     } else {
-        return PieceType::None;
+        return PieceType::NONE;
     }
 }
 

@@ -2,9 +2,8 @@
 #define __CELL_H__
 #include <iostream>
 #include <vector>
-//#include "textdisplay.h"
 
-enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King, None };
+enum class PieceType { Pawn, Bishop, Knight, Rook, Queen, King, NONE};
 enum class Colour { White, Black, None };
 
 class Cell {

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Grid.h"
 using namespace std;
 
@@ -13,6 +12,7 @@ Grid::~Grid() {}
 void Grid::init() {
     board = std::vector<std::vector<Cell>>(8, std::vector<Cell>(8));
     td = new TextDisplay();
+    gd = new GraphicsDisplay{x};
     Colour pieceColour = Colour::White;
     Colour cellColour = Colour::White;
     PieceType piece = PieceType::Rook;
@@ -48,6 +48,7 @@ void Grid::init() {
                     BlackPieces.emplace_back(Piece{piece, pieceColour, row, col});
                 }
                 td->updateTD(board[row][col]);
+                gd->notify(board[row][col]);
             } else if (row == 1 || row == 6) { //adds pawn line
                 piece = PieceType::Pawn;
                 if (row == 1) {
@@ -62,8 +63,10 @@ void Grid::init() {
                     BlackPieces.emplace_back(Piece{piece, pieceColour, row, col});
                 }
                 td->updateTD(board[row][col]);
+                gd->notify(board[row][col]);
             } else { // fills in board
                 board[row][col] = Cell(cellColour, row, col);
+                gd->notify(board[row][col]);
             }
             
         }
@@ -75,7 +78,7 @@ Cell* Grid::findCell(int r, int c) {
 }
 
 void Grid::add(Colour pieceColour, int rowA, int colA, int rowB, int colB) {
-    if (board[rowB][colB].getPieceType() != PieceType::None) { this->removePieceFromVector(rowB, colB); }
+    if (board[rowB][colB].getPieceType() != PieceType::NONE) { this->removePieceFromVector(rowB, colB); }
     PieceType pieceType = getPiece(pieceColour, rowA, colA)->getPieceType();
     getPiece(pieceColour, rowA, colA)->updateCoords(rowB, colB);
     //cout << "we got to here 4" << endl;
@@ -88,9 +91,10 @@ void Grid::add(Colour pieceColour, int rowA, int colA, int rowB, int colB) {
 
 void Grid::add(Colour pieceColour, PieceType piece, int row, int col) {
     board[row][col].add(piece, pieceColour);
-    if (board[row][col].getPieceType() != PieceType::None) { this->removePieceFromVector(row, col); }
+    if (board[row][col].getPieceType() != PieceType::NONE) { this->removePieceFromVector(row, col); }
     this->addPieceToVector(pieceColour, piece, row, col);
     td->updateTD(board[row][col]);
+    gd->notify(board[row][col]);
     cout << "piece added" << endl;
     // add to pieces vector
 }
@@ -137,6 +141,7 @@ void Grid::remove(int row, int col) {
     board[row][col].remove();
     this->removePieceFromVector(row, col);
     td->updateTD(board[row][col]);
+    gd->notify(board[row][col]);
     // remove from pieces vector
 }
 
@@ -183,7 +188,9 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
 
     this->updateAllThreats(rowB, colB);
     td->updateTD(board[rowA][colA]);
+    gd->notify(board[rowA][colA]);
     td->updateTD(board[rowB][colB]);
+    gd->notify(board[rowA][colB]);
 
     if (checkCheck(opColour)) {
         cout << "opponent is in check" << endl;
@@ -200,7 +207,7 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
 bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int colB) {
     Piece taken;
     bool capture = false;
-    if (board[rowB][colB].getPieceType() != PieceType::None) {
+    if (board[rowB][colB].getPieceType() != PieceType::NONE) {
         taken = Piece{board[rowB][colB].getPieceType(), board[rowB][colB].getPieceColour(), rowB, colB};
         capture = true;
     }
@@ -404,7 +411,7 @@ bool Grid::blockCheck2(int rowA, int colA, int rowB, int colB) { // returns fals
     int colStart = colA + colIncrement;
 
     while(rowStart != rowB || colStart != colB) {
-        if (board[rowStart][colStart].getPieceType() != PieceType::None) {
+        if (board[rowStart][colStart].getPieceType() != PieceType::NONE) {
             cout << "piece in the way at row" << rowStart << " and column: " << colStart  << endl;
             return true;
         }
@@ -441,7 +448,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                 rowA--;
                 colB++;
             }
-            if ((rowA == rowB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+            if ((rowA == rowB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::NONE) {
                 return true;
             }
         }
@@ -454,7 +461,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                 } else if (rowA < rowB) {
                     rowA++;
                 }
-                if ((rowA == rowB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                if ((rowA == rowB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::NONE) {
                     return true;
                 }
             }
@@ -465,7 +472,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                 } else if (colA < colB) {
                     colA++;
                 }
-                if ((colA == colB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                if ((colA == colB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::NONE) {
                     return true;
                 }
             }
@@ -479,7 +486,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                 } else if (rowA < rowB) {
                     rowA++;
                 }
-                if ((rowA == rowB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                if ((rowA == rowB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::NONE) {
                     return true;
                 }
             }
@@ -490,7 +497,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                 } else if (colA < colB) {
                     colA++;
                 }
-                if ((colA == colB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                if ((colA == colB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::NONE) {
                     return true;
                 }
             }
@@ -510,7 +517,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                     colB++;
                 }
                
-                if ((rowA == rowB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::None) {
+                if ((rowA == rowB && board[rowA][colA].getPieceColour() == colour) || board[rowA][colA].getPieceType() != PieceType::NONE) {
                     return true;
                 }
             }
@@ -518,15 +525,15 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
     } else if (piece == PieceType::King) {
         cout << "king block check" << endl;
         if (colA - colB == 2) { //for castling
-            if (board[rowA][colA - 1].getPieceType() != PieceType::None) {
+            if (board[rowA][colA - 1].getPieceType() != PieceType::NONE) {
                 return true;
-            } else if (board[rowA][colB].getPieceType() != PieceType::None) {
+            } else if (board[rowA][colB].getPieceType() != PieceType::NONE) {
                 return true;
             }
         } else if (colA - colB == -2) {
-            if (board[rowA][colA + 1].getPieceType() != PieceType::None) {
+            if (board[rowA][colA + 1].getPieceType() != PieceType::NONE) {
                 return true;
-            } else if (board[rowA][colB].getPieceType() != PieceType::None) {
+            } else if (board[rowA][colB].getPieceType() != PieceType::NONE) {
                 return true;
             }
         } else { //for all other movements
@@ -547,7 +554,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
                 } else if (rowA < rowB) {
                     rowA++;
                 }
-                if (board[rowA][colA].getPieceType() != PieceType::None) {
+                if (board[rowA][colA].getPieceType() != PieceType::NONE) {
                     return true;
                 }
             }

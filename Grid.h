@@ -1,10 +1,11 @@
 #ifndef __GRID_H__
 #define __GRID_H__
-#include <iostream>
 #include <vector>
 #include "Cell.h"
 #include "TextDisplay.h"
+#include "GraphicsDisplay.h"
 #include "Piece.h"
+#include "window.h"
 class Piece;
 
 enum class BotLevel { Level1, Level2, Level3 };
@@ -17,7 +18,8 @@ class Grid {
   Cell *BKpos;
   bool WKmoved, BKmoved, LWRmoved, RWRmoved, LBRmoved, RBRmoved = false;
 
-
+  GraphicsDisplay *gd{};
+  Xwindow x;
   TextDisplay *td;
 
 

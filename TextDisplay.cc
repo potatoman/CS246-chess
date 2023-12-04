@@ -14,7 +14,7 @@ TextDisplay::TextDisplay(): theDisplay{8, std::vector<char>(8, '_')} {
  }
 
 void TextDisplay::updateTD(Cell &c) {
-  /*if (c.getPieceType() == PieceType::None) {
+  /*if (c.getPieceType() == PieceType::NONE) {
     cout << "should be none" << endl;
   } else if (c.getPieceType() == PieceType::Rook) {
     cout << "rook" << endl;
