@@ -17,6 +17,9 @@ void Piece::setThreatStatus(bool stat) {
 bool Piece::getThreatStatus() {
     return underAttack;
 }
+std::vector<Cell*> * Piece::getCellsThreatening() {
+    return &cellsThreatening;
+}
 void Piece::updateCoords(int row, int col) {
     r = row;
     c = col;
@@ -283,7 +286,9 @@ void Piece::updateOpposingPieceThreatStatus(Grid &g, Colour attackingPieceColour
 }
 
 bool Piece::checkThreat(int row, int col) { // checks if the cell at row, col is under threat by this piece
-    for (auto i : cellsThreatening) {
+std::cout << "new call" << std::endl;
+    for (auto &i : cellsThreatening) {
+        std::cout << i << std::endl;
         if (i->getRow() == row && i->getCol() == col) {
             return true;
         }
@@ -293,6 +298,7 @@ bool Piece::checkThreat(int row, int col) { // checks if the cell at row, col is
 void Piece::updateThreatStatus(Grid &g) { //run after move on every piece that is under attack
     if (pieceColour == Colour::White) {
         for (int i = 0; i < g.getNumOfPiece(pieceColour); i++) {
+            std::cout << g.getNumOfPiece(pieceColour);
             if (g.getPiece(Colour::Black, i)->checkThreat(r, c)) {
                 underAttack = true;
                 return;

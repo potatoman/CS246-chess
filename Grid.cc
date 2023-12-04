@@ -79,7 +79,10 @@ Cell* Grid::findCell(int r, int c) {
 
 void Grid::add(Colour pieceColour, int rowA, int colA, int rowB, int colB) {
     if (board[rowB][colB].getPieceType() != PieceType::NONE) { this->removePieceFromVector(rowB, colB); }
+    cout << "check 1.1" << endl;
+    cout << "calling getPiece on row, col " << rowA << " " << colA << endl;
     PieceType pieceType = getPiece(pieceColour, rowA, colA)->getPieceType();
+    cout << "check 1.2" << endl;
     getPiece(pieceColour, rowA, colA)->updateCoords(rowB, colB);
     //cout << "we got to here 4" << endl;
     //getPiece(pieceColour, rowA, colB)->setRow(rowB);
@@ -195,19 +198,30 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
     if (checkCheck(opColour)) {
         cout << "opponent is in check" << endl;
         if (checkCheckMate(opColour)) {
+            cout << "you've checkmated your opponent" << endl;
             return 1;
         }
         //TODO - discuss if we want to return smth special for checking/output smth
+    } 
+    if (stalemateCheck(opColour)) {
+        cout << "you've reached a stalemate" << endl;
+        return 2;
     }
+    
     //cout << "opposite side is not in check" << endl;
     return 0;
 }
 
 
 bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int colB) {
+    if (rowA < 0 || rowA > 7 || colA < 0 || colA > 7 || rowB < 0 || rowB > 7 || colB < 0 || colB > 7) { return false; }
     Piece taken;
     bool capture = false;
     if (board[rowB][colB].getPieceType() != PieceType::NONE) {
+        if (piece == PieceType::Pawn && colA == colB) {
+            cout << "pawns can't capture moving forwards" << endl;
+            return false;
+        }
         taken = Piece{board[rowB][colB].getPieceType(), board[rowB][colB].getPieceColour(), rowB, colB};
         capture = true;
     }
@@ -220,12 +234,10 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
         return false;
     }
 
-
     if (!movementCheck(piece, colour, rowA, colA, rowB, colB)) {
         cout << "the piece you are trying to move cannot move like that" << endl;
         return false;
     }
-
     if (piece != PieceType::Knight) {
         if (blockCheck2(rowA, colA, rowB, colB)) {
             cout << "there is a piece blocking the path" << endl;
@@ -233,7 +245,6 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
         }
     }
 
-    
 
     //PieceType pieceB = board[rowB][colB].getPieceType();
     if (piece == PieceType::King) {
@@ -273,13 +284,15 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
         }
         WKpos = &board[rowB][colB];
     } else {
-        
+        cout << "check 4" << endl;
         this->add(colour, rowA, colA, rowB, colB);
     }
 
-    
+    cout << "check 5" << endl;
     this->updateAllThreats(rowB, colB);
+    cout << "check 6" << endl;
     if (checkCheck(colour)) {
+        cout << "check 6.1" << endl;
         if (castled) {
             if (colB == 6) {
                 this->add(colour, rowA, 5, rowB, 7);
@@ -289,21 +302,24 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
                 board[rowA][3].remove();
             }
         }
+
         this->add(colour, rowB, colB, rowA, colA);
+        cout << "check 6.2" << endl;
         if (capture) {
+            cout << "check 6.3" << endl;
             board[rowB][colB].add(taken.getPieceType(), taken.getPieceColour());
             this->addPieceToVector(taken);
             updateAllThreats(rowB, colB);
         }
         
         updateAllThreats(rowA, colA);
-        
+        cout << "check 6.4" << endl;
         cout << "this move puts you in check so it is not legal" << endl;
         return false;
     }
-
-
+cout << "check 7" << endl;
     this->add(colour, rowB, colB, rowA, colA);
+    cout << "check 8" << endl;
     if (capture) {
         board[rowB][colB].add(taken.getPieceType(), taken.getPieceColour());
         this->addPieceToVector(taken);
@@ -315,7 +331,16 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
 
 void Grid::updateAllThreats(int row, int col) {
     int length = WhitePieces.size();
-    for (int i = 0; i < length; i++) {
+    for (auto &i : WhitePieces) {
+       if ((i.getCol() == col && i.getRow() == row) || i.getPieceType() == PieceType::Bishop ||
+        i.getPieceType() == PieceType::Rook || i.getPieceType() == PieceType::Queen) {
+            i.updateCellsThreatening(*this);
+        }
+        if (i.getThreatStatus() == true) {
+            i.updateThreatStatus(*this);
+        }
+    }
+    /*for (int i = 0; i < length; i++) {
         if ((WhitePieces[i].getCol() == col && WhitePieces[i].getRow() == row) || WhitePieces[i].getPieceType() == PieceType::Bishop ||
         WhitePieces[i].getPieceType() == PieceType::Rook || WhitePieces[i].getPieceType() == PieceType::Queen) {
             WhitePieces[i].updateCellsThreatening(*this);
@@ -323,9 +348,18 @@ void Grid::updateAllThreats(int row, int col) {
         if (WhitePieces[i].getThreatStatus() == true) {
             WhitePieces[i].updateThreatStatus(*this);
         }
-    }
+    }*/
     length = BlackPieces.size();
-    for (int i = 0; i < length; i++) {
+    for (auto &i : BlackPieces) {
+       if ((i.getCol() == col && i.getRow() == row) || i.getPieceType() == PieceType::Bishop ||
+        i.getPieceType() == PieceType::Rook || i.getPieceType() == PieceType::Queen) {
+            i.updateCellsThreatening(*this);
+        }
+        if (i.getThreatStatus() == true) {
+            i.updateThreatStatus(*this);
+        }
+    }
+    /*for (int i = 0; i < length; i++) {
         if ((BlackPieces[i].getCol() == col && BlackPieces[i].getRow() == row) || BlackPieces[i].getPieceType() == PieceType::Bishop ||
         BlackPieces[i].getPieceType() == PieceType::Rook || BlackPieces[i].getPieceType() == PieceType::Queen) {
             BlackPieces[i].updateCellsThreatening(*this);
@@ -333,7 +367,7 @@ void Grid::updateAllThreats(int row, int col) {
         if (BlackPieces[i].getThreatStatus() == true) {
             BlackPieces[i].updateThreatStatus(*this);
         }
-    }
+    }*/
 }
 
 bool Grid::checkCheck(Colour colour) {  // return true if king is in check
@@ -389,10 +423,58 @@ bool Grid::movementCheck(PieceType piece, Colour colour, int rowA, int colA, int
     }
     return false;
 }
-bool Grid::checkCheckMate(Colour colour) { return false; }  // MUST WRITE
+
+bool Grid::checkCheckMate(Colour colour) {  // returns true if the colour is in checkmate, just checks if the colour has any legal moves, if it does then its not in checkmate
+    if (colour == Colour::White) {
+        for (auto i : WhitePieces) {
+            for (auto j : *i.getCellsThreatening()) {
+                cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << j->getRow() << ", col " << j->getCol() << " is legal" << endl;
+                if (legalMoveCheck(i.getPieceType(), i.getRow(), i.getCol(), j->getRow(), j->getCol())) {
+                    return false;
+                }
+            }
+            if (i.getPieceType() == PieceType::Pawn) {
+                if (i.getRow() == 1) {
+                    cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << i.getRow() + 2 << ", col " << i.getCol() << " is legal" << endl;
+                    if (legalMoveCheck(PieceType::Pawn, i.getRow(), i.getCol(), i.getRow() + 2, i.getCol())) {
+                        return false;
+                    }
+                }
+                cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << i.getRow() + 1 << ", col "<< i.getCol() << " is legal" << endl;
+                if (legalMoveCheck(PieceType::Pawn, i.getRow(), i.getCol(), i.getRow() + 1, i.getCol())) {
+                    return false;
+                }
+            }
+        } 
+    } else {
+        for (auto i : BlackPieces) {
+            for (auto j : *i.getCellsThreatening()) {
+
+                cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << j->getRow() << ", col "<< j->getCol() << " is legal" << endl;
+                if (legalMoveCheck(i.getPieceType(), i.getRow(), i.getCol(), j->getRow(), j->getCol())) {
+                    return false;
+                }
+            }
+            if (i.getPieceType() == PieceType::Pawn) {
+                if (i.getRow() == 7) {
+                    cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << i.getRow() - 2 << ", col "<< i.getCol() << " is legal" << endl;
+                    if (legalMoveCheck(PieceType::Pawn, i.getRow(), i.getCol(), i.getRow() - 2, i.getCol())) {
+                        return false;
+                    }
+                }
+                cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << i.getRow() - 1 << ", col "<< i.getCol() << " is legal" << endl;
+                if (legalMoveCheck(PieceType::Pawn, i.getRow(), i.getCol(), i.getRow() - 1, i.getCol())) {
+                    return false;
+                }
+            }
+        }
+
+    }
+    return true; 
+}
 
 bool Grid::blockCheck2(int rowA, int colA, int rowB, int colB) { // returns false if theres nothing blocking the move (no piece in between the coordinates)
-    cout << "called block check, rowA: " << rowA << " colA: " << colA << " rowB: " << rowB << " colB: " << colB << endl;
+    //cout << "called block check, rowA: " << rowA << " colA: " << colA << " rowB: " << rowB << " colB: " << colB << endl;
     int rowIncrement;
     int colIncrement;
     
@@ -412,14 +494,14 @@ bool Grid::blockCheck2(int rowA, int colA, int rowB, int colB) { // returns fals
 
     while(rowStart != rowB || colStart != colB) {
         if (board[rowStart][colStart].getPieceType() != PieceType::NONE) {
-            cout << "piece in the way at row" << rowStart << " and column: " << colStart  << endl;
+            //cout << "piece in the way at row" << rowStart << " and column: " << colStart  << endl;
             return true;
         }
         rowStart += rowIncrement;
         colStart += colIncrement;
     }
     
-    cout << "nothing in the way" << endl;
+    //cout << "nothing in the way" << endl;
     return false;
 }
 
@@ -563,7 +645,7 @@ bool Grid::blockCheck(PieceType piece, Colour colour, int rowA, int colA, int ro
     return false;
 }
 
-bool Grid::stalemateCheck(Colour colour) { return true; } // MUST WRITE
+bool Grid::stalemateCheck(Colour colour) { return checkCheckMate(colour); } // same as checkCheckMate because you're just checking if the colour has any legal moves
 
 void Grid::botMove(int botLevel, Colour colour) { return; }
 
@@ -586,21 +668,35 @@ Piece* Grid::getPiece(Colour pieceColour, int r, int c) {
     cout << length << endl;
     cout << "got here 1" << endl;
     if (pieceColour == Colour::White) {
-        for (int i = 0; i < length - 1; i++) {
+        cout << "got here 2" << endl;
+        /*for (int i = 0; i < length - 1; i++) {
+            cout << "in for loop " << i << endl;
             if (WhitePieces[i].getCol() == c && WhitePieces[i].getRow() == r) {
-                cout << "got here 2" << endl;
+                cout << "got here 3" << endl;
                 return &WhitePieces[i];
+            }
+        }*/
+        for (auto &i : WhitePieces) {
+            cout << i.getRow() << endl;
+            if (i.getRow() == r && i.getCol() == c) {
+                return &i;
             }
         }
     } else {
-        cout << "got here why??" << endl;
+        cout << "got here 4" << endl;
         length = BlackPieces.size();
         cout << length << endl;
-        for (int i = 0; i < length - 1; i++) {
+        for (auto &i : BlackPieces) {
+            cout << i.getRow() << endl;
+            if (i.getRow() == r && i.getCol() == c) {
+                return &i;
+            }
+        }
+        /*for (int i = 0; i < length - 1; i++) {
             if (BlackPieces[i].getCol() == c && BlackPieces[i].getRow() == r) {
                 return &BlackPieces[i];
             }
-        }
+        }*/
     }
 }
 
