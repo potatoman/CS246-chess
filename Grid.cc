@@ -49,6 +49,7 @@ void Grid::init() {
                 }
                 td->updateTD(board[row][col]);
                 gd->notify(board[row][col]);
+                gd->drawCoords(board[row][col]);
             } else if (row == 1 || row == 6) { //adds pawn line
                 piece = PieceType::Pawn;
                 if (row == 1) {
@@ -64,9 +65,11 @@ void Grid::init() {
                 }
                 td->updateTD(board[row][col]);
                 gd->notify(board[row][col]);
+                gd->drawCoords(board[row][col]);
             } else { // fills in board
                 board[row][col] = Cell(cellColour, row, col);
                 gd->notify(board[row][col]);
+                gd->drawCoords(board[row][col]);
             }
             
         }
@@ -95,6 +98,7 @@ void Grid::add(Colour pieceColour, PieceType piece, int row, int col) {
     this->addPieceToVector(pieceColour, piece, row, col);
     td->updateTD(board[row][col]);
     gd->notify(board[row][col]);
+    gd->drawCoords(board[row][col]);
     cout << "piece added" << endl;
     // add to pieces vector
 }
@@ -142,6 +146,7 @@ void Grid::remove(int row, int col) {
     this->removePieceFromVector(row, col);
     td->updateTD(board[row][col]);
     gd->notify(board[row][col]);
+    gd->drawCoords(board[row][col]);
     // remove from pieces vector
 }
 
@@ -189,8 +194,10 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
     this->updateAllThreats(rowB, colB);
     td->updateTD(board[rowA][colA]);
     gd->notify(board[rowA][colA]);
+    gd->drawCoords(board[rowA][colA]);
     td->updateTD(board[rowB][colB]);
-    gd->notify(board[rowA][colB]);
+    gd->notify(board[rowB][colB]);
+    gd->drawCoords(board[rowB][colB]);
 
     if (checkCheck(opColour)) {
         cout << "opponent is in check" << endl;
