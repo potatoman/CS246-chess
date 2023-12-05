@@ -3,7 +3,7 @@ using namespace std;
 
 
 
-Grid::Grid(): board{}, WhitePieces{}, BlackPieces{}, WKpos{nullptr}, BKpos{nullptr}, td{nullptr} {}
+Grid::Grid(): board{}, WhitePieces{}, BlackPieces{}, td{nullptr} {}
 
 
 Grid::~Grid() {}
@@ -92,14 +92,36 @@ std::vector<Piece> * Grid::getPiecesArray(Colour colour) {
 
 void Grid::add(Colour pieceColour, int rowA, int colA, int rowB, int colB) { 
     if (board[rowB][colB].getPieceType() != PieceType::NONE) { this->removePieceFromVector(rowB, colB); }
-    //cout << "check 1.1" << endl;
-    //cout << "calling getPiece on row, col " << rowA << " " << colA << endl;
     PieceType pieceType = getPiece(pieceColour, rowA, colA)->getPieceType();
-    //cout << "check 1.2" << endl;
     getPiece(pieceColour, rowA, colA)->updateCoords(rowB, colB);
     board[rowB][colB].add(pieceType, pieceColour);
     board[rowA][colA].remove();
-    
+}
+
+int Grid::add(PieceType pieceType, Colour colour, int row, int col) {
+    Piece piece = Piece{pieceType, colour, row, col};
+    addPieceToVector(piece);
+    updateAllThreats();
+    board[row][col].add(pieceType, colour);
+    Colour opColour;
+    if (piece.getPieceColour() == Colour::White) {
+        opColour == Colour::Black;
+    } else {
+        opColour == Colour::White;
+    }
+    if (checkCheck(opColour)) {
+        td->updateTD(board[row][col]);
+        gd->notify(board[row][col]);
+        if (checkCheckMate(opColour)) {
+            return 1;
+        } else if (stalemateCheck(opColour)) {
+            return 2;
+        }
+    } else {
+        td->updateTD(board[row][col]);
+        gd->notify(board[row][col]);
+        return 0;
+    }
 }
 
 void Grid::add(Colour pieceColour, PieceType piece, int row, int col) {
@@ -108,7 +130,6 @@ void Grid::add(Colour pieceColour, PieceType piece, int row, int col) {
     this->addPieceToVector(pieceColour, piece, row, col);
     td->updateTD(board[row][col]);
     gd->notify(board[row][col]);
-    cout << "piece added" << endl;
 }
 
 void Grid::removePieceFromVector(int row, int col) {
@@ -147,8 +168,6 @@ void Grid::addPieceToVector(Piece piece) {
     }
 }
 
-
-
 void Grid::remove(int row, int col) {
     board[row][col].remove();
     this->removePieceFromVector(row, col);
@@ -173,9 +192,11 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
         cout << "not a legal move" << endl;
         return 3; 
     }
-    
-    //TODO - what does the Wking || Bking check do?
-    //updates if rooks moved or not to allow for a castling check shortcut
+    if (piece == PieceType::Pawn && ((colour == Colour::White && rowB == 7) ||
+    (colour == Colour::Black && rowB == 0))) {
+        remove(rowA, colA);
+        return 4;
+    }
     if (piece == PieceType::Rook && (!LWRmoved || !RWRmoved || !LBRmoved || !RBRmoved)) {
         if (rowA == 0 && colA == 0) { LWRmoved = true; }
         if (rowA == 0 && colA == 7) { RWRmoved = true; }
@@ -191,24 +212,19 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
             BKmoved = true;
         }
     }
-
-    //TODO - promotioncheck()
-    
     this->add(colour, rowA, colA, rowB, colB);
 
     if (piece == PieceType::King && (abs(colB - colA) == 2)) {
         if (colB == 2) {
-            cout << "is it even callling this" << endl;
             this->add(colour, rowA, 0, rowB, 3);
-            this->updateAllThreats(rowB, 3);
+            this->updateAllThreats();
             td->updateTD(board[rowA][0]);
             gd->notify(board[rowA][0]);
             td->updateTD(board[rowB][3]);
             gd->notify(board[rowB][3]);
         } else if (colB == 6) {
-            cout << "is it even callling this??" << endl;
             this->add(colour, rowA, 7, rowB, 5);
-            this->updateAllThreats(rowB, 5);
+            this->updateAllThreats();
             td->updateTD(board[rowA][7]);
             gd->notify(board[rowA][7]);
             td->updateTD(board[rowB][5]);
@@ -216,7 +232,7 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
         }
     }
 
-    this->updateAllThreats(rowB, colB);
+    this->updateAllThreats();
     td->updateTD(board[rowA][colA]);
     gd->notify(board[rowA][colA]);
     td->updateTD(board[rowB][colB]);
@@ -272,7 +288,7 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
     //will check if there is a piece blocking the path between rowA colA and rowB colB except for knights
     //since knights jump over pieces and we already checked that the ending cell does not contain an ally piece
     if (piece != PieceType::Knight) {
-        if (blockCheck2(rowA, colA, rowB, colB)) {
+        if (blockCheck(rowA, colA, rowB, colB)) {
             cout << "there is a piece blocking the path" << endl;
             return false;
         }
@@ -284,7 +300,7 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
             cout << "cannot castle because you are in check" << endl;
             return false;
         }
-        if ((colB == 2 && blockCheck2(rowA, 0, rowA, 4)) || (colB == 6 && blockCheck2(rowA, 7, rowA, 4))) {
+        if ((colB == 2 && blockCheck(rowA, 0, rowA, 4)) || (colB == 6 && blockCheck(rowA, 7, rowA, 4))) {
             cout << "cannot castle because there is a piece in between" << endl;
             return false;
         }
@@ -309,75 +325,30 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
         }
         int middleCol = ((colB + colA)/2);
         this->add(colour, rowA, colA, rowB, middleCol);
-        this->updateAllThreats(rowB, middleCol);
+        this->updateAllThreats();
         if (checkCheck(colour)) {
             cout << "cannot castle because the spot in between would put you in check" << endl;
             this->add(colour, rowB, middleCol, rowA, colA);
-            this->updateAllThreats(rowA, colA);
+            this->updateAllThreats();
             return false;
         }
 
         this->add(colour, rowB, middleCol, rowB, colB);
-        this->updateAllThreats(rowB, colB);
+        this->updateAllThreats();
         if (checkCheck(colour)) {
             cout << "cannot castle because the the ending position would put you in check" << endl;
             this->add(colour, rowB, colB, rowA, colA);
-            this->updateAllThreats(rowA, colA);
+            this->updateAllThreats();
             return false;
         }
-        //this->add(colour, rowB, colB, rowA, colA);
-        this->updateAllThreats(rowA, colA);
-
-
-
-
-        /*
-        //checking castle
-        //TODO - check if theres a check somwhere along the way
-        if (colB == 2) {
-            //only need to check colour and if the pieces moved or not since columns r the same and rows we keep
-            if (colour == Colour::White) {
-                if (LWRmoved && WKmoved) { return false; }
-            } else {
-                if (LBRmoved && BKmoved) { return false; }
-            }
-            this->add(colour, rowA, colA, rowB, colB);
-            board[rowA][colA].remove();
-            this->add(colour, rowA, 0, rowB, 3);
-            board[rowA][0].remove();
-            castled = true;
-        } else if (colB == 6) {
-            if (colour == Colour::White) {
-                if (LWRmoved && WKmoved) { return false; }
-            } else {
-                if (LBRmoved && BKmoved) { return false; }
-            }
-            this->add(colour, rowA, colA, rowB, colB);
-            board[rowA][colA].remove();
-            this->add(colour, rowA, 7, rowB, 5);
-            board[rowA][7].remove();
-            castled = true;
-        } else {
-            if (colour == Colour::White) {
-                WKmoved = true;
-            } else {
-                BKmoved = true;
-            }
-            this->add(colour, rowA, colA, rowB, colB);
-            board[rowA][colA].remove();
-        }
-        WKpos = &board[rowB][colB]; */
+        this->updateAllThreats();
     } else {
         //simulates the actual move so that we can do various checks on it
-        cout << "check 4" << endl;
         this->add(colour, rowA, colA, rowB, colB);
     }
     //will call updateAllThreats now that the piece has moved, allowing us to check for things like reveal checks
-    cout << "check 5" << endl;
-    this->updateAllThreats(rowB, colB);
-    cout << "check 6" << endl;
+    this->updateAllThreats();
     if (checkCheck(colour)) {
-        cout << "check 6.1" << endl;
         if (castled) {
             if (colB == 6) {
                 this->add(colour, rowA, 5, rowB, 7);
@@ -390,28 +361,23 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
         //we then revert the movement since legalMoveCheck does not actually move it and is used for various other checks
         //where we do not want the move to stick
         this->add(colour, rowB, colB, rowA, colA);
-        cout << "check 6.2" << endl;
         if (capture) {
-            cout << "check 6.3" << endl;
             board[rowB][colB].add(taken.getPieceType(), taken.getPieceColour());
             this->addPieceToVector(taken);
-            updateAllThreats(rowB, colB);
+            updateAllThreats();
         }
         
-        updateAllThreats(rowA, colA);
-        cout << "check 6.4" << endl;
+        updateAllThreats();
         cout << "this move puts you in check so it is not legal" << endl;
         return false;
     }
-cout << "check 7" << endl;
     this->add(colour, rowB, colB, rowA, colA);
-    cout << "check 8" << endl;
     if (capture) {
         board[rowB][colB].add(taken.getPieceType(), taken.getPieceColour());
         this->addPieceToVector(taken);
-        updateAllThreats(rowB, colB);
+        updateAllThreats();
     }
-    updateAllThreats(rowA, colA);
+    updateAllThreats();
     return true;
 }
 
@@ -431,45 +397,7 @@ void Grid::updateAllThreats() {
 }
 
 
-void Grid::updateAllThreats(int row, int col) {
-    updateAllThreats();
-    for (auto &i : WhitePieces) {
-       if ((i.getCol() == col && i.getRow() == row) || i.getPieceType() == PieceType::Bishop ||
-        i.getPieceType() == PieceType::Rook || i.getPieceType() == PieceType::Queen) {
-            i.updateCellsThreatening(*this);
-        }
-        if (i.getThreatStatus() == true) {
-            i.updateThreatStatus(*this);
-        }
-    }
-    /*for (int i = 0; i < length; i++) {
-        if ((WhitePieces[i].getCol() == col && WhitePieces[i].getRow() == row) || WhitePieces[i].getPieceType() == PieceType::Bishop ||
-        WhitePieces[i].getPieceType() == PieceType::Rook || WhitePieces[i].getPieceType() == PieceType::Queen) {
-            WhitePieces[i].updateCellsThreatening(*this);
-        }
-        if (WhitePieces[i].getThreatStatus() == true) {
-            WhitePieces[i].updateThreatStatus(*this);
-        }
-    }*/
-    for (auto &i : BlackPieces) {
-       if ((i.getCol() == col && i.getRow() == row) || i.getPieceType() == PieceType::Bishop ||
-        i.getPieceType() == PieceType::Rook || i.getPieceType() == PieceType::Queen) {
-            i.updateCellsThreatening(*this);
-        }
-        if (i.getThreatStatus() == true) {
-            i.updateThreatStatus(*this);
-        }
-    }
-    /*for (int i = 0; i < length; i++) {
-        if ((BlackPieces[i].getCol() == col && BlackPieces[i].getRow() == row) || BlackPieces[i].getPieceType() == PieceType::Bishop ||
-        BlackPieces[i].getPieceType() == PieceType::Rook || BlackPieces[i].getPieceType() == PieceType::Queen) {
-            BlackPieces[i].updateCellsThreatening(*this);
-        }
-        if (BlackPieces[i].getThreatStatus() == true) {
-            BlackPieces[i].updateThreatStatus(*this);
-        }
-    }*/
-}
+
 
 bool Grid::checkCheck(Colour colour) {  
     if (colour == Colour::White) {
@@ -528,19 +456,16 @@ bool Grid::checkCheckMate(Colour colour) {
     if (colour == Colour::White) {
         for (auto i : WhitePieces) {
             for (auto j : *i.getCellsThreatening()) {
-                cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << j->getRow() << ", col " << j->getCol() << " is legal" << endl;
                 if (legalMoveCheck(i.getPieceType(), i.getRow(), i.getCol(), j->getRow(), j->getCol())) {
                     return false;
                 }
             }
             if (i.getPieceType() == PieceType::Pawn) {
                 if (i.getRow() == 1) {
-                    cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << i.getRow() + 2 << ", col " << i.getCol() << " is legal" << endl;
                     if (legalMoveCheck(PieceType::Pawn, i.getRow(), i.getCol(), i.getRow() + 2, i.getCol())) {
                         return false;
                     }
                 }
-                cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << i.getRow() + 1 << ", col "<< i.getCol() << " is legal" << endl;
                 if (legalMoveCheck(PieceType::Pawn, i.getRow(), i.getCol(), i.getRow() + 1, i.getCol())) {
                     return false;
                 }
@@ -549,20 +474,16 @@ bool Grid::checkCheckMate(Colour colour) {
     } else {
         for (auto i : BlackPieces) {
             for (auto j : *i.getCellsThreatening()) {
-
-                cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << j->getRow() << ", col "<< j->getCol() << " is legal" << endl;
                 if (legalMoveCheck(i.getPieceType(), i.getRow(), i.getCol(), j->getRow(), j->getCol())) {
                     return false;
                 }
             }
             if (i.getPieceType() == PieceType::Pawn) {
                 if (i.getRow() == 7) {
-                    cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << i.getRow() - 2 << ", col "<< i.getCol() << " is legal" << endl;
                     if (legalMoveCheck(PieceType::Pawn, i.getRow(), i.getCol(), i.getRow() - 2, i.getCol())) {
                         return false;
                     }
                 }
-                cout << "checking if row " << i.getRow() << ", col " << i.getCol() << ", to row " << i.getRow() - 1 << ", col "<< i.getCol() << " is legal" << endl;
                 if (legalMoveCheck(PieceType::Pawn, i.getRow(), i.getCol(), i.getRow() - 1, i.getCol())) {
                     return false;
                 }
@@ -573,7 +494,7 @@ bool Grid::checkCheckMate(Colour colour) {
     return true; 
 }
 
-bool Grid::blockCheck2(int rowA, int colA, int rowB, int colB) {
+bool Grid::blockCheck(int rowA, int colA, int rowB, int colB) {
     int rowIncrement;
     int colIncrement;
     if (rowA == rowB) {
@@ -600,7 +521,7 @@ bool Grid::blockCheck2(int rowA, int colA, int rowB, int colB) {
 
 bool Grid::stalemateCheck(Colour colour) { return checkCheckMate(colour); }
 
-void Grid::botLvl1(Colour colour) {
+int Grid::botLvl1(Colour colour) {
     int pieceToMove;
     int cellToMove;
     Piece* piece;
@@ -610,87 +531,101 @@ void Grid::botLvl1(Colour colour) {
          int lengthOfPieces = WhitePieces.size();
          int length;
         while(true) {
+            //finds the piece it is going to try to move
             pieceToMove = rand() % lengthOfPieces;
-            cout << pieceToMove << endl;
             piece = &WhitePieces[pieceToMove];
             length = piece->getCellsThreatening()->size();
-            if (length == 0) {
-                continue;
-            }
+            //specifies move for pawn since pawn doesnt move where it is threatening
             if (piece->getPieceType() == PieceType::Pawn) {
                 if (piece->getRow() == 1) {
                     int flipCoin = rand() % 2;
                     if (flipCoin == 1) {
-                        if (move(piece->getRow(), piece->getCol(), piece->getRow() + 2, piece->getCol()) != 3) {
+                        int result = move(piece->getRow(), piece->getCol(), piece->getRow() + 2, piece->getCol());
+                        if (result != 3) {
+                            return result;
                             break;
                         }
                     } else {
-                        if (move(piece->getRow(), piece->getCol(), piece->getRow() + 1, piece->getCol()) != 3) {
+                        int result = move(piece->getRow(), piece->getCol(), piece->getRow() + 1, piece->getCol());
+                        if (result != 3) {
+                            return result;
                             break;
                         }
                     }
                 } else {
-                    if (move(piece->getRow(), piece->getCol(), piece->getRow() + 1, piece->getCol()) != 3) {
+                    int result = move(piece->getRow(), piece->getCol(), piece->getRow() + 2, piece->getCol());
+                    if (result != 3) {
+                        return result;
                         break;
                     }
                 }
+                //will skip if the length of cells threatening is empty
+            } else if (length == 0) {
+                continue;
             } else {
                 cellToMove = rand() & length;
                 cell = piece->getCellsThreatening()[0][cellToMove];
-            }
-            if (move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol()) != 3) {
-                break;
+                int result = move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol());
+                if (result != 3) {
+                    return result;
+                    break;
+                }
             }
         }
         //black check
     } else if (colour == Colour::Black) {
         int lengthOfPieces = BlackPieces.size();
         int length;
+        int result;
         while(true) {
             pieceToMove = rand() % lengthOfPieces;
-            cout << pieceToMove << endl;
             piece = &BlackPieces[pieceToMove];
             length = piece->getCellsThreatening()->size();
-            if (length == 0) {
-                continue;
-            }
             if (piece->getPieceType() == PieceType::Pawn) {
                 if (piece->getRow() == 6) {
                     int flipCoin = rand() % 2;
                     if (flipCoin == 1) {
-                        if (move(piece->getRow(), piece->getCol(), piece->getRow() - 2, piece->getCol()) != 3) {
+                        result = move(piece->getRow(), piece->getCol(), piece->getRow() - 2, piece->getCol());
+                        if (result != 3) {
+                            return result;
                             break;
                         }
                     } else {
-                        if (move(piece->getRow(), piece->getCol(), piece->getRow() - 1, piece->getCol()) != 3) {
+                        result = move(piece->getRow(), piece->getCol(), piece->getRow() - 1, piece->getCol());
+                        if(result != 3) {
+                            return result;
                             break;
                         }
                     }
                 } else {
-                    if (move(piece->getRow(), piece->getCol(), piece->getRow() - 1, piece->getCol()) != 3) {
+                    result = move(piece->getRow(), piece->getCol(), piece->getRow() - 1, piece->getCol());
+                    if (result != 3) {
+                        return result;
                         break;
                     }
                 }
+            } else if (length == 0) {
+                continue;
             } else {
                 cellToMove = rand() & length;
                 cell = piece->getCellsThreatening()[0][cellToMove];
-            }
-            if (move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol()) != 3) {
-                break;
+                result = move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol()); 
+                if (result != 3) {
+                    return result;
+                    break;
+                }
             }
         }
     }
 }
 
-void Grid::botLvl2(Colour colour) {
+int Grid::botLvl2(Colour colour) {
     Piece* piece;
     Cell* cell;
     int rowA, colA, rowB, colB;
     Piece taken;
     //white check
     if (colour == Colour::White) {
-        //might have to check for legal move
-        //add priority
         int length = WhitePieces.size();
         int cellsThreateningLength;
         for (int i = 0; i < length; i++) {
@@ -698,40 +633,61 @@ void Grid::botLvl2(Colour colour) {
             cellsThreateningLength = piece->getCellsThreatening()->size();
             rowA = piece->getRow();
             colA = piece->getCol();
+            //prioritizes checks over taking pieces
             for (int j = 0; j < cellsThreateningLength; j++) {
+                cellsThreateningLength = piece->getCellsThreatening()->size();
                 cell = piece->getCellsThreatening()[0][j];
                 rowB = cell->getRow();
                 colB = cell->getCol();
                 if (cell->getPieceType() == PieceType::NONE) {
-                    add(Colour::White, rowA, colA, rowB, colB);
-                    updateAllThreats(rowB, colB);
-                    if (checkCheck(Colour::Black)) {
-                        //might have to check for checkmate and stalemate and return an actual value, talk abt it
+                    add(colour, rowA, colA, rowB, colB);
+                    updateAllThreats();
+                    if (!checkCheck(colour)) {
+                        if (checkCheck(Colour::Black)) {
+                            td->updateTD(board[rowB][colB]);
+                            gd->notify(board[rowB][colB]);
+                            td->updateTD(board[rowA][colA]);
+                            gd->notify(board[rowA][colA]);
                         randomize(piece->getPieceColour());
-                        return;
-                    } else {
-                        add(Colour::White, rowB, colB, rowA, colA);
-                        updateAllThreats(rowA, colA);
-                        continue;
+                        if (checkCheckMate(Colour::Black)) {
+                            return 1;
+                        } else if (stalemateCheck(Colour::Black)) {
+                            return 2;
+                        }
+                        return 0;
+                        } else {
+                            add(colour, rowB, colB, rowA, colA);
+                            updateAllThreats();
+                            continue;
+                        }
                     }
                 } else {
-                    taken = getPieceObject(colour, rowB, colB);
+                    taken = getPieceObject(Colour::Black, rowB, colB);
                     add(colour, rowA, colA, rowB, colB);
-                    updateAllThreats(rowB, colB);
-                    if (checkCheck(Colour::Black)) {
-                        randomize(colour);
-                        return;
-                    } else {
-                        add(colour, rowB, colB, rowA, colA);
-                        addPieceToVector(taken);
-                        updateAllThreats(rowA, colA);
-                        updateAllThreats(rowB, colB);
-                        continue;
+                    updateAllThreats();
+                    if (!checkCheck(colour)) {
+                        if (checkCheck(Colour::Black)) {
+                            td->updateTD(board[rowB][colB]);
+                            gd->notify(board[rowB][colB]);
+                            td->updateTD(board[rowA][colA]);
+                            gd->notify(board[rowA][colA]);
+                            randomize(colour);
+                            if (checkCheckMate(Colour::Black)) {
+                                return 1;
+                            } else if (stalemateCheck(Colour::Black)) {
+                                return 2;
+                            }
+                            return 0;
+                        } else {
+                            add(colour, rowB, colB, rowA, colA);
+                            botAdd(taken, rowA, colA);
+                            continue;
+                        }
                     }
-
                 }
             }
         }
+        //checks if there are any pieces to take
         for (int i = 0; i < length; i++) {
             piece = &WhitePieces[i];
             cellsThreateningLength = piece->getCellsThreatening()->size();
@@ -741,17 +697,14 @@ void Grid::botLvl2(Colour colour) {
                 cell = piece->getCellsThreatening()[0][j];
                 rowB = cell->getRow();
                 colB = cell->getCol();
-                if (cell->getPieceType() != PieceType::NONE || cell->getPieceType() != PieceType::King) {
-                    move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol());
-                    return;
+                if (cell->getPieceType() != PieceType::NONE && cell->getPieceType() != PieceType::King) {
+                    return move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol());
                 }
             }
         }
-        botLvl1(colour);
+        return botLvl1(colour);
         //black check
     } else if (colour == Colour::Black) {
-        //might have to check for legal move
-        //add priority
         int length = BlackPieces.size();
         int cellsThreateningLength;
         for (int i = 0; i < length; i++) {
@@ -760,36 +713,56 @@ void Grid::botLvl2(Colour colour) {
             rowA = piece->getRow();
             colA = piece->getCol();
             for (int j = 0; j < cellsThreateningLength; j++) {
+                cellsThreateningLength = piece->getCellsThreatening()->size();
                 cell = piece->getCellsThreatening()[0][j];
                 rowB = cell->getRow();
                 colB = cell->getCol();
                 if (cell->getPieceType() == PieceType::NONE) {
                     add(colour, rowA, colA, rowB, colB);
-                    updateAllThreats(rowB, colB);
-                    if (checkCheck(Colour::Black)) {
-                        //might have to check for checkmate and stalemate and return an actual value, talk abt it
-                        randomize(piece->getPieceColour());
-                        return;
-                    } else {
-                        add(colour, rowB, colB, rowA, colA);
-                        updateAllThreats(rowA, colA);
-                        continue;
+                    updateAllThreats();
+                    if (!checkCheck(colour)) {
+                        if (checkCheck(Colour::White)) {
+                            td->updateTD(board[rowB][colB]);
+                            gd->notify(board[rowB][colB]);
+                            td->updateTD(board[rowA][colA]);
+                            gd->notify(board[rowA][colA]);
+                            if (checkCheckMate(Colour::White)) {
+                                return 1;
+                            } else if (stalemateCheck(Colour::White)) {
+                                return 2;
+                            } 
+                            //might have to check for checkmate and stalemate and return an actual value, talk abt it
+                            randomize(piece->getPieceColour());
+                            return 0;
+                        } else {
+                            add(colour, rowB, colB, rowA, colA);
+                            updateAllThreats();
+                            continue;
+                        }
                     }
                 } else {
-                    taken = getPieceObject(colour, rowB, colB);
+                    taken = getPieceObject(Colour::White, rowB, colB);
                     add(colour, rowA, colA, rowB, colB);
-                    updateAllThreats(rowB, colB);
-                    if (checkCheck(Colour::Black)) {
-                        randomize(colour);
-                        return;
-                    } else {
-                        add(colour, rowB, colB, rowA, colA);
-                        addPieceToVector(taken);
-                        updateAllThreats(rowA, colA);
-                        updateAllThreats(rowB, colB);
-                        continue;
+                    updateAllThreats();
+                    if (!checkCheck(colour)) {
+                        if (checkCheck(Colour::White)) {
+                            td->updateTD(board[rowB][colB]);
+                            gd->notify(board[rowB][colB]);
+                            td->updateTD(board[rowA][colA]);
+                            gd->notify(board[rowA][colA]);
+                            if (checkCheckMate(Colour::White)) {
+                                return 1;
+                            } else if (stalemateCheck(Colour::White)) {
+                                return 2;
+                            }
+                            randomize(colour);
+                            return 0;
+                        } else {
+                            add(colour, rowB, colB, rowA, colA);
+                            botAdd(taken, rowA, colA);
+                            continue;
+                        }
                     }
-
                 }
             }
         }
@@ -802,17 +775,22 @@ void Grid::botLvl2(Colour colour) {
                 cell = piece->getCellsThreatening()[0][j];
                 rowB = cell->getRow();
                 colB = cell->getCol();
-                if (cell->getPieceType() != PieceType::NONE || cell->getPieceType() != PieceType::King) {
-                    move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol());
-                    return;
+                if (cell->getPieceType() != PieceType::NONE && cell->getPieceType() != PieceType::King) {
+                    return move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol());
                 }
             }
         }
-        botLvl1(colour);
+        return botLvl1(colour);
     }
 }
 
-void Grid::botLvl3(Colour colour) {
+void Grid::botAdd(Piece piece, int row, int col) {
+    board[row][col].add(piece.getPieceType(), piece.getPieceColour());
+    this->addPieceToVector(piece);
+    updateAllThreats();
+}
+
+int Grid::botLvl3(Colour colour) {
     Piece* piece;
     Cell* cell;
     int rowA, colA, rowB, colB;
@@ -821,6 +799,7 @@ void Grid::botLvl3(Colour colour) {
         Piece taken;
         int length = WhitePieces.size();
         int cellsThreateningLength;
+        //prioritizes keeping pieces safe then checking then taking pieces
         for (int i = 0; i < length; i++) {
             piece = &WhitePieces[i];
             if (piece->getThreatStatus()) {
@@ -828,41 +807,55 @@ void Grid::botLvl3(Colour colour) {
                 rowA = piece->getRow();
                 colA = piece->getCol();
                 for (int j = 0; j < cellsThreateningLength; j++) {
+                    cellsThreateningLength = piece->getCellsThreatening()->size();
                     cell = WhitePieces[i].getCellsThreatening()[0][j];
                     rowB = cell->getRow();
                     colB = cell->getCol();
                     if (cell->getPieceType() == PieceType::NONE) {
                         add(colour, rowA, colA, rowB, colB);
-                        updateAllThreats(rowB, colB);
+                        updateAllThreats();
+                        //checks if the move puts it in check or if it is still under attack
+                        //if the piece is still under attack after exhausting everything it will just continue
+                        //and see if it can save another piece before trying to check or take another piece
                         if (checkCheck(colour) || piece->getThreatStatus()) {
                             add(colour, rowB, colB, rowA, colA);
-                            updateAllThreats(rowA, colA);
+                            updateAllThreats();
                             continue;
                         } else {
+                            if (checkCheck(Colour::Black)) {
+                                if (checkCheckMate(Colour::Black)) {
+                                    return 1;
+                                } else if (stalemateCheck(Colour::Black)) {
+                                    return 2;
+                                }
+                            }
                             randomize(colour);
-                            //may have to check for mate
-                            return;
+                            return 3;
                         }
                     } else {
                         taken = getPieceObject(Colour::Black, rowB, colB);
                         add(colour, rowA, colA, rowB, colB);
-                        updateAllThreats(rowB, colB);
+                        updateAllThreats();
                         if (checkCheck(colour) || piece->getThreatStatus()) {
                             add(colour, rowB, colB, rowA, colA);
-                            addPieceToVector(taken);
-                            updateAllThreats(rowA, colA);
-                            updateAllThreats(rowB, colB);
+                            botAdd(taken, rowA, colA);
                             continue;
                         } else {
+                            if (checkCheck(Colour::Black)) {
+                                if (checkCheckMate(Colour::Black)) {
+                                    return 1;
+                                } else if (stalemateCheck(Colour::Black)) {
+                                    return 2;
+                                }
+                            }
                             randomize(colour);
-                            //may have to check for mate
-                            return;
+                            return 3;
                         }
                     }
                 }
             }                    
         }
-        botLvl2(colour);
+        return botLvl2(colour);
     }
     //black check
     if (colour == Colour::Black) {
@@ -876,39 +869,52 @@ void Grid::botLvl3(Colour colour) {
                 rowA = piece->getRow();
                 colA = piece->getCol();
                 for (int j = 0; j < cellsThreateningLength; j++) {
+                    cellsThreateningLength = piece->getCellsThreatening()->size();
                     cell = BlackPieces[i].getCellsThreatening()[0][j];
                     rowB = cell->getRow();
                     colB = cell->getCol();
                     if (cell->getPieceType() == PieceType::NONE) {
                         add(colour, rowA, colA, rowB, colB);
-                        updateAllThreats(rowB, colB);
+                        updateAllThreats();
                         if (checkCheck(colour) || piece->getThreatStatus()) {
                             add(colour, rowB, colB, rowA, colA);
-                            updateAllThreats(rowA, colA);
+                            updateAllThreats();
                             continue;
                         } else {
+                            if (checkCheck(Colour::White)) {
+                                if (checkCheckMate(Colour::White)) {
+                                    return 1;
+                                } else if (stalemateCheck(Colour::White)) {
+                                    return 2;
+                                }
+                            }
                             randomize(colour);
-                            return;
+                            return 3;
                         }
                     } else {
                         taken = getPieceObject(Colour::White, rowB, colB);
                         add(colour, rowA, colA, rowB, colB);
-                        updateAllThreats(rowB, colB);
+                        updateAllThreats();
                         if (checkCheck(colour) || piece->getThreatStatus()) {
                             add(colour, rowB, colB, rowA, colA);
-                            addPieceToVector(taken);
-                            updateAllThreats(rowA, colA);
-                            updateAllThreats(rowB, colB);
+                            botAdd(taken, rowA, colA);
                             continue;
                         } else {
+                            if (checkCheck(Colour::White)) {
+                                if (checkCheckMate(Colour::White)) {
+                                    return 1;
+                                } else if (stalemateCheck(Colour::White)) {
+                                    return 2;
+                                }
+                            }
                             randomize(colour);
-                            return;
+                            return 3;
                         }
                     }
                 }
             }                    
         }
-        botLvl2(colour);
+        return botLvl2(colour);
     }
 
 }
@@ -929,13 +935,13 @@ int Grid::convertValues(PieceType piece) {
     }
 }
 
-void Grid::botMove(BotLevel botLevel, Colour colour) {
+int Grid::botMove(BotLevel botLevel, Colour colour) {
     if (botLevel == BotLevel::Level1) {
-        botLvl1(colour);
+        return botLvl1(colour);
     } else if (botLevel == BotLevel::Level2) {
-        botLvl2(colour);
+        return botLvl2(colour);
     } else if (botLevel == BotLevel::Level3) {
-        botLvl3(colour);
+        return botLvl3(colour);
     } else if (botLevel == BotLevel::Level4) {
 
     }
@@ -978,59 +984,33 @@ Piece* Grid::getPiece(Colour pieceColour, int index) {
 
 Piece* Grid::getPiece(Colour pieceColour, int r, int c) {
     int length = WhitePieces.size();
-    cout << length << endl;
-    cout << "got here 1" << endl;
     if (pieceColour == Colour::White) {
-        cout << "got here 2" << endl;
-        /*for (int i = 0; i < length - 1; i++) {
-            cout << "in for loop " << i << endl;
-            if (WhitePieces[i].getCol() == c && WhitePieces[i].getRow() == r) {
-                cout << "got here 3" << endl;
-                return &WhitePieces[i];
-            }
-        }*/
         for (auto &i : WhitePieces) {
-            cout << i.getRow() << endl;
             if (i.getRow() == r && i.getCol() == c) {
                 return &i;
             }
         }
     } else {
-        cout << "got here 4" << endl;
         length = BlackPieces.size();
-        cout << length << endl;
         for (auto &i : BlackPieces) {
-            cout << i.getRow() << endl;
             if (i.getRow() == r && i.getCol() == c) {
                 return &i;
             }
         }
-        /*for (int i = 0; i < length - 1; i++) {
-            if (BlackPieces[i].getCol() == c && BlackPieces[i].getRow() == r) {
-                return &BlackPieces[i];
-            }
-        }*/
     }
 }
 
 Piece Grid::getPieceObject(Colour pieceColour, int r, int c) {
     int length = WhitePieces.size();
-    cout << length << endl;
-    cout << "womp womp" << endl;
     if (pieceColour == Colour::White) {
-        cout << "womp womp bitch" << endl;
          for (auto &i : WhitePieces) {
-            cout << i.getRow() << endl;
             if (i.getRow() == r && i.getCol() == c) {
                 return i;
             }
         }
     } else {
-        cout << "womp womp fucker" << endl;
         length = BlackPieces.size();
-        cout << length << endl;
         for (auto &i : BlackPieces) {
-            cout << i.getRow() << endl;
             if (i.getRow() == r && i.getCol() == c) {
                 return i;
             }

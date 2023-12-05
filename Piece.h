@@ -12,7 +12,6 @@ class Piece {
     Colour pieceColour;
     int r, c;
     bool underAttack = false;
-    bool attacking;
 
 
 
@@ -40,9 +39,6 @@ class Piece {
 
     //returns a pointer to CellsThreatening
     std::vector<Cell*> * getCellsThreatening();
-
-    //returns attacking
-    bool getAttacking();
     
     //updates all of the cells this piece is threatening by looking at the board
     void updateCellsThreatening(Grid &g);

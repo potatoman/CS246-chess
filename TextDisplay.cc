@@ -14,12 +14,6 @@ TextDisplay::TextDisplay(): theDisplay{8, std::vector<char>(8, '_')} {
  }
 
 void TextDisplay::updateTD(Cell &c) {
-  /*if (c.getPieceType() == PieceType::NONE) {
-    cout << "should be none" << endl;
-  } else if (c.getPieceType() == PieceType::Rook) {
-    cout << "rook" << endl;
-  }*/
-
   if (c.getPieceColour() == Colour::White) {
     if (c.getPieceType() == PieceType::Pawn) {
         theDisplay[c.getRow()][c.getCol()] = 'P';

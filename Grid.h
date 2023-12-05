@@ -23,6 +23,8 @@ class Grid {
   //adds pieces to the board and vector when initially setting up the board
   void add(Colour pieceColour, int rowA, int colA, int rowB, int colB);
 
+  void botAdd(Piece piece, int row, int col);
+
   //removes the piece in row col its vector of pieces
   void removePieceFromVector(int row, int col);
 
@@ -39,8 +41,6 @@ class Grid {
   //whenever a piece gets out of the way and calls updateThreatStatus on every piece that is under attack
   //to check if it is now being blocked by another piece or if the move made it no longer be under attack
   //does this for all white and black pieces
-  void updateAllThreats(int row, int col);
-
   void updateAllThreats();
 
   //will return true if king is in check by checking is the king's underattack boolean is true
@@ -70,8 +70,11 @@ class Grid {
   //finds a given cell
   Cell* findCell(int r, int c);
 
-  //effectively how we actually move a piece from point A to B
+  //add for setup
   void add(Colour pieceColour, PieceType piece, int row, int col);
+
+  //adds a piece for promotion
+  int add(PieceType pieceType, Colour colour, int row, int col);
   
   //removes the piece in row col from its vector of pieces and from the cell
   void remove(int row, int col);
@@ -79,16 +82,16 @@ class Grid {
   // update pieces locations and potentially remove from pieces vector if theres a capture
   int move(int rowA, int colA, int rowB, int colB);
 
-  void botMove(BotLevel botLevel, Colour colour);
+  int botMove(BotLevel botLevel, Colour colour);
 
-  void botLvl1(Colour colour);
-  void botLvl2(Colour colour);
-  void botLvl3(Colour colour);
+  int botLvl1(Colour colour);
+  int botLvl2(Colour colour);
+  int botLvl3(Colour colour);
   void botLvl4(Colour colour);
   int convertValues(PieceType piece);
 
   //returns false if theres nothing blocking the move (no piece in between the coordinates)
-  bool blockCheck2(int rowA, int colA, int rowB, int colB);
+  bool blockCheck(int rowA, int colA, int rowB, int colB);
 
   //returns the number of pieces in an vector
   int getNumOfPiece(Colour pieceColour);

@@ -9,6 +9,7 @@ void GraphicsDisplay::init() {
 
 void GraphicsDisplay::notify(Cell &c) {
     draw(c);
+    drawCoords(c);
 }
 
 void GraphicsDisplay::draw(Cell &c) {
