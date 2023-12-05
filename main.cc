@@ -77,11 +77,9 @@ int main() {
             black[0] = toupper(black[0]);
             if (white[0] == 'H') {
             whitePlayer = PlayerType::Human;
-            cout << "you genuinely have brain cancer" << endl;
             } 
             if (black[0] == 'H') {
                 blackPlayer = PlayerType::Human;
-                cout << "you genuinely have brain cancer but expected" << endl;
             } 
             if (white[0] == 'C') {
                 int length = white.length();
@@ -89,12 +87,9 @@ int main() {
                 for (int i = 0; i < length; i++) {
                     if (white[i] == '1') {
                         whiteBot = BotLevel::Level1;
-                        cout << "you genuinely have brain cancer :)" << endl;
                     } else if (white[i] == '2') {
                         whiteBot = BotLevel::Level2;
-                        cout << "you genuinely have brain cancer :(" << endl;
                     } else if (white[i] == '3') {
-                        cout << "you genuinely have brain cancer LOL" << endl;
                         whiteBot = BotLevel::Level3;
                     } else if (white[i] == '4') {
                         whiteBot = BotLevel::Level4;
@@ -107,7 +102,6 @@ int main() {
                 for (int i = 0; i < length; i++) {
                     if (black[i] == '1') {
                         blackBot = BotLevel::Level1;
-                        cout << "you genuinely have brain cancer hahahahah" << endl;
                     } else if (black[i] == '2') {
                         blackBot = BotLevel::Level2;
                     } else if (black[i] == '3') {
@@ -169,6 +163,9 @@ int main() {
                         } else if (result == 2) {
                             gameStarted = false;
                             cout << "It's a stalemate" << endl;
+                        } else if (result == 3) {
+                            cout << "not a valid move" << endl;
+                            continue;
                         }
                         if (whoseTurn == Colour::White) {
                             whoseTurn = Colour::Black;

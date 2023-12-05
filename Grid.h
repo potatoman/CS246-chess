@@ -14,8 +14,6 @@ class Grid {
   std::vector<std::vector<Cell>> board;
   std::vector<Piece> WhitePieces;
   std::vector<Piece> BlackPieces;
-  Cell *WKpos;
-  Cell *BKpos;
   bool WKmoved, BKmoved, LWRmoved, RWRmoved, LBRmoved, RBRmoved = false;
 
   GraphicsDisplay *gd{};

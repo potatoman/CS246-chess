@@ -13,6 +13,8 @@ void Grid::init() {
     board = std::vector<std::vector<Cell>>(8, std::vector<Cell>(8));
     td = new TextDisplay();
     gd = new GraphicsDisplay{x};
+    WhitePieces.clear();
+    BlackPieces.clear();
     Colour pieceColour = Colour::White;
     Colour cellColour = Colour::White;
     PieceType piece = PieceType::Rook;
@@ -605,33 +607,77 @@ void Grid::botLvl1(Colour colour) {
     Cell* cell;
     //white check
     if (colour == Colour::White) {
-        int length = WhitePieces.size();
-        pieceToMove = rand() % length;
-        piece = &WhitePieces[pieceToMove];
-        length = piece->getCellsThreatening()->size();
-        //make sure that pawns are correct since they cant move in their cells threatened
-        if (piece->getPieceType() == PieceType::Pawn) {
-
-        } else {
-             cellToMove = rand() & length;
-            cell = piece->getCellsThreatening()[0][cellToMove];
-            move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol());
+         int lengthOfPieces = WhitePieces.size();
+         int length;
+        while(true) {
+            pieceToMove = rand() % lengthOfPieces;
+            cout << pieceToMove << endl;
+            piece = &WhitePieces[pieceToMove];
+            length = piece->getCellsThreatening()->size();
+            if (length == 0) {
+                continue;
+            }
+            if (piece->getPieceType() == PieceType::Pawn) {
+                if (piece->getRow() == 1) {
+                    int flipCoin = rand() % 2;
+                    if (flipCoin == 1) {
+                        if (move(piece->getRow(), piece->getCol(), piece->getRow() + 2, piece->getCol()) != 3) {
+                            break;
+                        }
+                    } else {
+                        if (move(piece->getRow(), piece->getCol(), piece->getRow() + 1, piece->getCol()) != 3) {
+                            break;
+                        }
+                    }
+                } else {
+                    if (move(piece->getRow(), piece->getCol(), piece->getRow() + 1, piece->getCol()) != 3) {
+                        break;
+                    }
+                }
+            } else {
+                cellToMove = rand() & length;
+                cell = piece->getCellsThreatening()[0][cellToMove];
+            }
+            if (move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol()) != 3) {
+                break;
+            }
         }
         //black check
     } else if (colour == Colour::Black) {
-        int length = BlackPieces.size();
+        int lengthOfPieces = BlackPieces.size();
+        int length;
         while(true) {
-            pieceToMove = rand() % length;
+            pieceToMove = rand() % lengthOfPieces;
             cout << pieceToMove << endl;
             piece = &BlackPieces[pieceToMove];
             length = piece->getCellsThreatening()->size();
             if (length == 0) {
                 continue;
             }
-            cellToMove = rand() & length;
-            cell = piece->getCellsThreatening()[0][cellToMove];
-            if (move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol()) == )
-            break;
+            if (piece->getPieceType() == PieceType::Pawn) {
+                if (piece->getRow() == 6) {
+                    int flipCoin = rand() % 2;
+                    if (flipCoin == 1) {
+                        if (move(piece->getRow(), piece->getCol(), piece->getRow() - 2, piece->getCol()) != 3) {
+                            break;
+                        }
+                    } else {
+                        if (move(piece->getRow(), piece->getCol(), piece->getRow() - 1, piece->getCol()) != 3) {
+                            break;
+                        }
+                    }
+                } else {
+                    if (move(piece->getRow(), piece->getCol(), piece->getRow() - 1, piece->getCol()) != 3) {
+                        break;
+                    }
+                }
+            } else {
+                cellToMove = rand() & length;
+                cell = piece->getCellsThreatening()[0][cellToMove];
+            }
+            if (move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol()) != 3) {
+                break;
+            }
         }
     }
 }
