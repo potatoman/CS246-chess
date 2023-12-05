@@ -165,7 +165,10 @@ int main() {
                                 whiteScore += 1;
                             } else {
                                 blackScore += 1;
-                        }
+                            }
+                        } else if (result == 2) {
+                            gameStarted = false;
+                            cout << "It's a stalemate" << endl;
                         }
                         if (whoseTurn == Colour::White) {
                             whoseTurn = Colour::Black;

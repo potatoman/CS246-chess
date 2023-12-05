@@ -607,9 +607,14 @@ void Grid::botLvl1(Colour colour) {
         pieceToMove = rand() % length;
         piece = &WhitePieces[pieceToMove];
         length = piece->getCellsThreatening()->size();
-        cellToMove = rand() & length;
-        cell = piece->getCellsThreatening()[0][cellToMove];
-        move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol());
+        //make sure that pawns are correct since they cant move in their cells threatened
+        if (piece->getPieceType() == PieceType::Pawn) {
+
+        } else {
+             cellToMove = rand() & length;
+            cell = piece->getCellsThreatening()[0][cellToMove];
+            move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol());
+        }
         //black check
     } else if (colour == Colour::Black) {
         int length = BlackPieces.size();
@@ -623,10 +628,9 @@ void Grid::botLvl1(Colour colour) {
             }
             cellToMove = rand() & length;
             cell = piece->getCellsThreatening()[0][cellToMove];
+            if (move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol()) == )
             break;
         }
-        
-        move(piece->getRow(), piece->getCol(), cell->getRow(), cell->getCol());
     }
 }
 
