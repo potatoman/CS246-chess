@@ -14,16 +14,23 @@ class Cell {
   
 
  public:
-  Cell();  // Default constructor
+  Cell();
   Cell(Colour cellColour, int r, int c);
   Cell(PieceType piece, Colour cellColour, Colour pieceColour, int r, int c);
   
+  //sets the pieceType to NONE
   void remove();
+  //sets the pieceType and pieceColour
   void add(PieceType pieceType, Colour pieceColour);
+  //returns pieceType
   PieceType getPieceType();
+  //returns pieceColour
   Colour getPieceColour();
+  //returns cellColour
   Colour getCellColour();
+  //returns r
   int getRow();
+  //returns c
   int getCol();
 
 };

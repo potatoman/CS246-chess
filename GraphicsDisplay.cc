@@ -8,16 +8,17 @@ void GraphicsDisplay::init() {
 }
 
 void GraphicsDisplay::notify(Cell &c) {
-    draw(c); //encapsulates draw so that we can't get random windows
+    draw(c);
 }
 
 void GraphicsDisplay::draw(Cell &c) {
-    int color = 0; //sets rectangle to black by default so you can see something
+    int color = 0;
     if (c.getCellColour() == Colour::Black) {
         color = 2;
     }
+    //we build up from the bottom up because otherwise the board squares would overlap the pieces
     window.fillRectangle((c.getCol()) * cellSize, (7 - c.getRow()) * cellSize, cellSize, cellSize, color);
-
+    //in our vector and cells, we have the pieces flipped, so we have to flip them here so that they're the right way around
     if(c.getPieceType() == PieceType::Bishop) {
         if (c.getPieceColour() == Colour::Black) {
             window.fillRectangle((c.getCol()) * cellSize + 10, (7 -c.getRow()) * cellSize + 10, cellSize - 20, cellSize - 20, 3);
@@ -82,6 +83,7 @@ void GraphicsDisplay::draw(Cell &c) {
 }
 
 void GraphicsDisplay::drawCoords(Cell &c) {
+    //separated this out to prevent the coordinates from being deleted when a piece moved
     if ((c.getRow() == 7 || c.getRow()) == 0 && c.getCol() == 0) {
         window.drawString(3 ,(cellSize * 8 - 53), "1");
         window.drawString((cellSize - 5), (cellSize * 8 - 5), "a");

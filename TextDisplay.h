@@ -10,10 +10,12 @@ class TextDisplay {
  public:
   TextDisplay();
 
+  //updates the text display
   void updateTD(Cell &c);
 
   ~TextDisplay();
 
+  //prints out the board
   friend std::ostream &operator<<(std::ostream &out, const TextDisplay &td);
 };
 

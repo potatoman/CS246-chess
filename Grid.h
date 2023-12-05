@@ -22,19 +22,39 @@ class Grid {
   Xwindow x;
   TextDisplay *td;
 
-
-
-  bool legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int colB);
-  bool checkCheck(Colour colour);
-  bool movementCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB);
-  bool checkCheckMate(Colour colour);
-  bool stalemateCheck(Colour colour);
-  bool blockCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB);
-  void removePieceFromVector(int row, int col);
-  void addPieceToVector(Colour pieceColour, PieceType piece, int row, int col);
-  void addPieceToVector(Piece piece);
+  //adds pieces to the board and vector when initially setting up the board
   void add(Colour pieceColour, int rowA, int colA, int rowB, int colB);
+
+  //removes the piece in row col its vector of pieces
+  void removePieceFromVector(int row, int col);
+
+  //adds the piece in row col to its respective vector of pieces
+  void addPieceToVector(Colour pieceColour, PieceType piece, int row, int col);
+  
+  //adds the piece in row col to its respective vector of pieces
+  void addPieceToVector(Piece piece);
+
+  //determines if a move from rowA colA to rowB colB is possible for the piece and the given board state
+  bool legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int colB);
+
+  //will call updateCellsThreatening on every rook, bishop since their cells threatened changes 
+  //whenever a piece gets out of the way and calls updateThreatStatus on every piece that is under attack
+  //to check if it is now being blocked by another piece or if the move made it no longer be under attack
+  //does this for all white and black pieces
   void updateAllThreats(int row, int col);
+
+  //will return true if king is in check by checking is the king's underattack boolean is true
+  bool checkCheck(Colour colour);
+
+  //checks if the move from rowA colA to rowB colB is allowed for the given piece, ignoring any pieces that might be blocking
+  bool movementCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB);
+
+  //returns true if the colour is in checkmate. Does this by checking if the colour has any legal moves,
+  //if it does then its not in checkmate
+  bool checkCheckMate(Colour colour);
+
+  //same as checkCheckMate because you're just checking if the colour has any legal moves
+  bool stalemateCheck(Colour colour);
 
  public:
   Grid();
@@ -42,19 +62,36 @@ class Grid {
 
   
   
-
+  //initializes the base chess board, along with text and graphic display
   void init();
-  void add(Colour pieceColour, PieceType piece, int row, int col);
-  void remove(int row, int col);
+
+  //finds a given cell
   Cell* findCell(int r, int c);
-  int getNumOfPiece(Colour pieceColour);
-  Piece* getPiece(Colour pieceColour, int index);
-  Piece* getPiece(Colour pieceColour, int r, int c);
+
+  //effectively how we actually move a piece from point A to B
+  void add(Colour pieceColour, PieceType piece, int row, int col);
+  
+  //removes the piece in row col from its vector of pieces and from the cell
+  void remove(int row, int col);
+
+  // update pieces locations and potentially remove from pieces vector if theres a capture
   int move(int rowA, int colA, int rowB, int colB);
+
   void botMove(BotLevel botLevel, Colour colour);
+
+  //returns false if theres nothing blocking the move (no piece in between the coordinates)
   bool blockCheck2(int rowA, int colA, int rowB, int colB);
 
-  
+  //returns the number of pieces in an vector
+  int getNumOfPiece(Colour pieceColour);
+
+  //returns a piece based off of iteration
+  Piece* getPiece(Colour pieceColour, int index);
+
+  //returns a piece based on position
+  Piece* getPiece(Colour pieceColour, int r, int c);
+
+  //prints out the grid
   friend std::ostream &operator<<(std::ostream &out, const Grid &g);
 };
 

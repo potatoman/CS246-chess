@@ -33,20 +33,13 @@ int Piece::getCol() {
     return c;
 }
 
-void Piece::setCol(int c) {
-    this->c = c;
-}
-
-void Piece::setRow(int r) {
-    this->r = r;
-}
-
-void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece that just moved and every rook, bishop, queen both colours
+void Piece::updateCellsThreatening(Grid &g) {
+    //gets run on every move on the piece that just moved and every rook, bishop, queen both colours
     int currentCol;
     int currentRow;
     cellsThreatening.clear();
     if (piece == PieceType::Pawn) {
-        //threatening top left and top right (maybe bottom if its a black pawn)
+        //threatening top left and top right (bottom if its a black pawn)
         if (pieceColour == Colour::White) {
             if (c != 0) {
                 cellsThreatening.emplace_back(g.findCell(r+1, c-1));  
@@ -74,7 +67,10 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
                 }  
             }
         }
+    //put rook queen and king movement together for the squares immediately around it
+    //then filter out the king
     } else if (piece == PieceType::Rook || piece == PieceType::Queen || piece == PieceType::King) { 
+        //add pieces immediately around it (that are valid) since it will always be threatening at least those
             if (r != 0) {
                 cellsThreatening.emplace_back(g.findCell(r-1, c));
                 if (g.findCell(r-1, c)->getPieceType() != PieceType::NONE) { 
@@ -103,6 +99,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
                 currentRow = r;
                 currentCol = c;
                 currentCol -=2;
+                //checks pieces to the left
                 while (currentCol >= 0 && !g.blockCheck2(r, c, r, currentCol)) {
                     // add cell at [r][currentCol] to the vector
                     cellsThreatening.emplace_back(g.findCell(r, currentCol));
@@ -112,6 +109,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
                     currentCol-=1;
                 }
                 currentCol = c + 2;
+                //checks pieces to the right
                 while (currentCol <= 7 && !g.blockCheck2(r, c, r, currentCol)) {
                     // add cell at [r][currentCol] to the vector
                     cellsThreatening.emplace_back(g.findCell(r, currentCol));
@@ -122,6 +120,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
                 }
                 currentCol = c;
                 currentRow = r + 2;
+                //checks pieces above
                 while (currentRow <= 7 && !g.blockCheck2(r, c, currentRow, c)) {
                     // add cell at [currentRow][c] to the vector
                     cellsThreatening.emplace_back(g.findCell(currentRow, c));
@@ -131,6 +130,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
                     currentRow+=1;
                 }
                 currentRow = r - 2;
+                //checks pieces below
                 while (currentRow >= 0 && !g.blockCheck2(r, c, currentRow, c)) {
                     // add cell at [currentRow][c] to the vector
                     cellsThreatening.emplace_back(g.findCell(currentRow, c));
@@ -142,6 +142,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
         }
        
     } else if (piece == PieceType::Knight) {
+        //knight is always threatening its squares unless they are not on the board
         if (r + 1 <= 7 && c + 2 <= 7) { 
             cellsThreatening.emplace_back(g.findCell(r+1, c+2)); 
             if (g.findCell(r+1, c+2)->getPieceType() != PieceType::NONE) { 
@@ -221,7 +222,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
             currentRow = r + 2;
             currentCol = c + 2;
             while (currentRow <= 7 && currentCol <= 7 && !g.blockCheck2(r, c, currentRow, currentCol)) {
-                // add cell to vector
+                //add top right
                 cellsThreatening.emplace_back(g.findCell(currentRow, currentCol));
                 if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, currentRow, currentCol); 
@@ -233,7 +234,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
             currentRow = r + 2;
             currentCol = c - 2;
             while (currentRow <= 7 && currentCol >= 0 && !g.blockCheck2(r, c, currentRow, currentCol)) {
-                // add cell to vector
+                // add top left
                 cellsThreatening.emplace_back(g.findCell(currentRow, currentCol));
                 if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, currentRow, currentCol); 
@@ -245,7 +246,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
             currentRow = r - 2;
             currentCol = c + 2;
             while (currentRow >= 0 && currentCol <= 7 && !g.blockCheck2(r, c, currentRow, currentCol)) {
-                // add cell to vector
+                // add bottom right
                 cellsThreatening.emplace_back(g.findCell(currentRow, currentCol));
                 if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, currentRow, currentCol); 
@@ -257,7 +258,7 @@ void Piece::updateCellsThreatening(Grid &g) {//run on every move on the piece th
             currentRow = r - 2;
             currentCol = c - 2;
             while (currentRow >= 0 && currentCol >= 0 && !g.blockCheck2(r, c, currentRow, currentCol)) {
-                // add cell to vector
+                // add left
                 cellsThreatening.emplace_back(g.findCell(currentRow, currentCol));
                 if (g.findCell(currentRow, currentCol)->getPieceType() != PieceType::NONE) { 
                     updateOpposingPieceThreatStatus(g, pieceColour, currentRow, currentCol); 
@@ -285,7 +286,7 @@ void Piece::updateOpposingPieceThreatStatus(Grid &g, Colour attackingPieceColour
     }
 }
 
-bool Piece::checkThreat(int row, int col) { // checks if the cell at row, col is under threat by this piece
+bool Piece::checkThreat(int row, int col) {
 std::cout << "new call" << std::endl;
     for (auto &i : cellsThreatening) {
         std::cout << i << std::endl;
@@ -295,7 +296,7 @@ std::cout << "new call" << std::endl;
     }
     return false;
 }
-void Piece::updateThreatStatus(Grid &g) { //run after move on every piece that is under attack
+void Piece::updateThreatStatus(Grid &g) {
     if (pieceColour == Colour::White) {
         for (int i = 0; i < g.getNumOfPiece(pieceColour); i++) {
             std::cout << g.getNumOfPiece(pieceColour);
