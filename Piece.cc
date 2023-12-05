@@ -287,9 +287,9 @@ void Piece::updateOpposingPieceThreatStatus(Grid &g, Colour attackingPieceColour
 }
 
 bool Piece::checkThreat(int row, int col) {
-std::cout << "new call" << std::endl;
+//std::cout << "new call" << std::endl;
     for (auto &i : cellsThreatening) {
-        std::cout << i << std::endl;
+        //std::cout << i << std::endl;
         if (i->getRow() == row && i->getCol() == col) {
             return true;
         }
@@ -298,16 +298,29 @@ std::cout << "new call" << std::endl;
 }
 void Piece::updateThreatStatus(Grid &g) {
     if (pieceColour == Colour::White) {
-        for (int i = 0; i < g.getNumOfPiece(pieceColour); i++) {
+        /*for (int i = 0; i < g.getNumOfPiece(pieceColour); i++) {
             std::cout << g.getNumOfPiece(pieceColour);
             if (g.getPiece(Colour::Black, i)->checkThreat(r, c)) {
                 underAttack = true;
                 return;
             }
+        }*/
+        for (auto &i : *g.getPiecesArray(Colour::Black)) {
+            if (i.checkThreat(r, c)) {
+                underAttack = true;
+                return;
+            }
         }
     } else {
-        for (int i = 0; i < g.getNumOfPiece(pieceColour); i++) {
+        /*for (int i = 0; i < g.getNumOfPiece(pieceColour); i++) {
             if (g.getPiece(Colour::White, i)->checkThreat(r, c)) {
+                underAttack = true;
+                return;
+            }
+        }*/
+
+        for (auto &i : *g.getPiecesArray(Colour::White)) {
+            if (i.checkThreat(r, c)) {
                 underAttack = true;
                 return;
             }

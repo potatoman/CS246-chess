@@ -79,13 +79,20 @@ void Grid::init() {
 Cell* Grid::findCell(int r, int c) {
     return &board[r][c];
 }
+std::vector<Piece> * Grid::getPiecesArray(Colour colour) {
+    if (colour == Colour::White) {
+        return &WhitePieces;
+    } else {
+        return &BlackPieces;
+    }
+}
 
 void Grid::add(Colour pieceColour, int rowA, int colA, int rowB, int colB) { 
     if (board[rowB][colB].getPieceType() != PieceType::NONE) { this->removePieceFromVector(rowB, colB); }
-    cout << "check 1.1" << endl;
-    cout << "calling getPiece on row, col " << rowA << " " << colA << endl;
+    //cout << "check 1.1" << endl;
+    //cout << "calling getPiece on row, col " << rowA << " " << colA << endl;
     PieceType pieceType = getPiece(pieceColour, rowA, colA)->getPieceType();
-    cout << "check 1.2" << endl;
+    //cout << "check 1.2" << endl;
     getPiece(pieceColour, rowA, colA)->updateCoords(rowB, colB);
     board[rowB][colB].add(pieceType, pieceColour);
     board[rowA][colA].remove();
@@ -167,24 +174,44 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
     //TODO - what does the Wking || Bking check do?
     //updates if rooks moved or not to allow for a castling check shortcut
     if (piece == PieceType::Rook && (!LWRmoved || !RWRmoved || !LBRmoved || !RBRmoved)) {
-        if (rowA == 0) {
-            if (colA == 0) {
-                RWRmoved = true;
-            } else {
-                LWRmoved = true;
-            }
-        } else {
-            if (colA == 0) {
-                RBRmoved = true;
-            } else {
-                LBRmoved = true;
-            }
+        if (rowA == 0 && colA == 0) { LWRmoved = true; }
+        if (rowA == 0 && colA == 7) { RWRmoved = true; }
+        if (rowA == 7 && colA == 0) { LBRmoved = true; }
+        if (rowA == 7 && colA == 7) { RBRmoved = true; }
+    }
+
+    if (piece == PieceType::King && (!WKmoved || !BKmoved)) {
+        if (colour == Colour::White) {
+            WKmoved = true;
+        }
+        if (colour == Colour::Black) {
+            BKmoved = true;
         }
     }
 
     //TODO - promotioncheck()
     
     this->add(colour, rowA, colA, rowB, colB);
+
+    if (piece == PieceType::King && (abs(colB - colA) == 2)) {
+        if (colB == 2) {
+            cout << "is it even callling this" << endl;
+            this->add(colour, rowA, 0, rowB, 3);
+            this->updateAllThreats(rowB, 3);
+            td->updateTD(board[rowA][0]);
+            gd->notify(board[rowA][0]);
+            td->updateTD(board[rowB][3]);
+            gd->notify(board[rowB][3]);
+        } else if (colB == 6) {
+            cout << "is it even callling this??" << endl;
+            this->add(colour, rowA, 7, rowB, 5);
+            this->updateAllThreats(rowB, 5);
+            td->updateTD(board[rowA][7]);
+            gd->notify(board[rowA][7]);
+            td->updateTD(board[rowB][5]);
+            gd->notify(board[rowB][5]);
+        }
+    }
 
     this->updateAllThreats(rowB, colB);
     td->updateTD(board[rowA][colA]);
@@ -220,6 +247,11 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
         }
         taken = Piece{board[rowB][colB].getPieceType(), board[rowB][colB].getPieceColour(), rowB, colB};
         capture = true;
+    } else {
+        if (piece == PieceType::Pawn && colA != colB) {
+            cout << "pawns can only move diagonally if they are capturing" << endl;
+            return false;
+        }
     }
     Colour colour = board[rowA][colA].getPieceColour();
     bool castled = false;
@@ -243,7 +275,59 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
     }
 
     //handles castling
-    if (piece == PieceType::King) {
+    if ((piece == PieceType::King) && (colA == 4) && abs(colA-colB) == 2) {
+        if (checkCheck(colour)) { 
+            cout << "cannot castle because you are in check" << endl;
+            return false;
+        }
+        if ((colB == 2 && blockCheck2(rowA, 0, rowA, 4)) || (colB == 6 && blockCheck2(rowA, 7, rowA, 4))) {
+            cout << "cannot castle because there is a piece in between" << endl;
+            return false;
+        }
+        if (colour == Colour::White) {
+            if (WKmoved == true) {
+                cout << "cannot castle because you've already moved the white king" << endl;
+                return false;
+            }
+            if ((colB == 2 && LWRmoved) || (colB == 6 && RWRmoved)) {
+                cout << "cannot castle in that direction because you've already moved that rook" << endl;
+                return false;
+            }  
+        } else {
+            if (BKmoved == true) {
+                cout << "cannot castle because you've already moved the black king" << endl;
+                return false;
+            }
+            if ((colB == 2 && LBRmoved) || (colB == 6 && RBRmoved)) {
+                cout << "cannot castle in that direction because you've already moved that rook" << endl;
+                return false;
+            } 
+        }
+        int middleCol = ((colB + colA)/2);
+        this->add(colour, rowA, colA, rowB, middleCol);
+        this->updateAllThreats(rowB, middleCol);
+        if (checkCheck(colour)) {
+            cout << "cannot castle because the spot in between would put you in check" << endl;
+            this->add(colour, rowB, middleCol, rowA, colA);
+            this->updateAllThreats(rowA, colA);
+            return false;
+        }
+
+        this->add(colour, rowB, middleCol, rowB, colB);
+        this->updateAllThreats(rowB, colB);
+        if (checkCheck(colour)) {
+            cout << "cannot castle because the the ending position would put you in check" << endl;
+            this->add(colour, rowB, colB, rowA, colA);
+            this->updateAllThreats(rowA, colA);
+            return false;
+        }
+        //this->add(colour, rowB, colB, rowA, colA);
+        this->updateAllThreats(rowA, colA);
+
+
+
+
+        /*
         //checking castle
         //TODO - check if theres a check somwhere along the way
         if (colB == 2) {
@@ -278,7 +362,7 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
             this->add(colour, rowA, colA, rowB, colB);
             board[rowA][colA].remove();
         }
-        WKpos = &board[rowB][colB];
+        WKpos = &board[rowB][colB]; */
     } else {
         //simulates the actual move so that we can do various checks on it
         cout << "check 4" << endl;

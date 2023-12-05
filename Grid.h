@@ -91,6 +91,8 @@ class Grid {
   //returns a piece based on position
   Piece* getPiece(Colour pieceColour, int r, int c);
 
+  std::vector<Piece> * getPiecesArray(Colour colour);
+
   //prints out the grid
   friend std::ostream &operator<<(std::ostream &out, const Grid &g);
 };
