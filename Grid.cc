@@ -428,7 +428,9 @@ void Grid::updateAllThreats() {
     }
 }
 
+
 void Grid::updateAllThreats(int row, int col) {
+    updateAllThreats();
     for (auto &i : WhitePieces) {
        if ((i.getCol() == col && i.getRow() == row) || i.getPieceType() == PieceType::Bishop ||
         i.getPieceType() == PieceType::Rook || i.getPieceType() == PieceType::Queen) {
