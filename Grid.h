@@ -43,6 +43,8 @@ class Grid {
   //does this for all white and black pieces
   void updateAllThreats(int row, int col);
 
+  void updateAllThreats();
+
   //will return true if king is in check by checking is the king's underattack boolean is true
   bool checkCheck(Colour colour);
 
@@ -56,6 +58,8 @@ class Grid {
   //same as checkCheckMate because you're just checking if the colour has any legal moves
   bool stalemateCheck(Colour colour);
 
+  //randomizes the order of a vector array containing pieces
+  void randomize(Colour colour);
  public:
   Grid();
   ~Grid();
@@ -79,17 +83,26 @@ class Grid {
 
   void botMove(BotLevel botLevel, Colour colour);
 
+  void botLvl1(Colour colour);
+  void botLvl2(Colour colour);
+  void botLvl3(Colour colour);
+  void botLvl4(Colour colour);
+  int convertValues(PieceType piece);
+
   //returns false if theres nothing blocking the move (no piece in between the coordinates)
   bool blockCheck2(int rowA, int colA, int rowB, int colB);
 
   //returns the number of pieces in an vector
   int getNumOfPiece(Colour pieceColour);
 
-  //returns a piece based off of iteration
+  //returns a pointer to a piece based off of iteration
   Piece* getPiece(Colour pieceColour, int index);
 
-  //returns a piece based on position
+  //returns a pointer to a piece based on position
   Piece* getPiece(Colour pieceColour, int r, int c);
+
+  //returns a piece object based on position
+  Piece getPieceObject(Colour pieceColour, int r, int c);
 
   //prints out the grid
   friend std::ostream &operator<<(std::ostream &out, const Grid &g);

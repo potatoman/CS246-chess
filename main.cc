@@ -71,31 +71,43 @@ int main() {
         if (cmd == "game") {
             string white;
             string black;
+            gameStarted = true;
             cin >> white >> black;
-            toupper(white[0]);
-            toupper(black[0]);
+            white[0] = toupper(white[0]);
+            black[0] = toupper(black[0]);
             if (white[0] == 'H') {
-                whitePlayer = PlayerType::Human;
-            } else if (black[0] == 'H') {
+            whitePlayer = PlayerType::Human;
+            cout << "you genuinely have brain cancer" << endl;
+            } 
+            if (black[0] == 'H') {
                 blackPlayer = PlayerType::Human;
-            } else if (white[0] == 'C') {
+                cout << "you genuinely have brain cancer but expected" << endl;
+            } 
+            if (white[0] == 'C') {
                 int length = white.length();
+                whitePlayer = PlayerType::Bot;
                 for (int i = 0; i < length; i++) {
                     if (white[i] == '1') {
                         whiteBot = BotLevel::Level1;
+                        cout << "you genuinely have brain cancer :)" << endl;
                     } else if (white[i] == '2') {
                         whiteBot = BotLevel::Level2;
+                        cout << "you genuinely have brain cancer :(" << endl;
                     } else if (white[i] == '3') {
+                        cout << "you genuinely have brain cancer LOL" << endl;
                         whiteBot = BotLevel::Level3;
                     } else if (white[i] == '4') {
                         whiteBot = BotLevel::Level4;
                     }
                 }
-            } else if (black[0] == 'C') {
+            }
+            if (black[0] == 'C') {
                 int length = black.length();
+                blackPlayer = PlayerType::Bot;
                 for (int i = 0; i < length; i++) {
                     if (black[i] == '1') {
                         blackBot = BotLevel::Level1;
+                        cout << "you genuinely have brain cancer hahahahah" << endl;
                     } else if (black[i] == '2') {
                         blackBot = BotLevel::Level2;
                     } else if (black[i] == '3') {
@@ -104,7 +116,7 @@ int main() {
                         blackBot = BotLevel::Level4;
                     }
                 }
-            }
+        }
         } else if (cmd == "move") {
             //TODO - add check to make sure they are moving their own pieces
             if (!gameStarted) {
@@ -164,6 +176,7 @@ int main() {
                         cout << "not your piece, try again" << endl;
                     }
                 } else {
+                    cout << "dumbass" << endl;
                     if (whoseTurn == Colour::White) {
                         g.botMove(whiteBot, whoseTurn);
                         whoseTurn = Colour::Black;
@@ -172,6 +185,11 @@ int main() {
                         whoseTurn = Colour::White;
                     }
                 }
+            }
+            if (whoseTurn == Colour::Black) {
+                cout << "Black" << endl;
+            } else {
+                cout << "White" << endl;
             }
             
             cout << g;
