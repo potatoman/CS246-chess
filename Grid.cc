@@ -680,7 +680,7 @@ int Grid::botLvl2(Colour colour) {
                             return 0;
                         } else {
                             add(colour, rowB, colB, rowA, colA);
-                            botAdd(taken, rowA, colA);
+                            botAdd(taken, rowB, colB);
                             continue;
                         }
                     }
@@ -759,7 +759,7 @@ int Grid::botLvl2(Colour colour) {
                             return 0;
                         } else {
                             add(colour, rowB, colB, rowA, colA);
-                            botAdd(taken, rowA, colA);
+                            botAdd(taken, rowB, colB);
                             continue;
                         }
                     }
@@ -838,7 +838,7 @@ int Grid::botLvl3(Colour colour) {
                         updateAllThreats();
                         if (checkCheck(colour) || piece->getThreatStatus()) {
                             add(colour, rowB, colB, rowA, colA);
-                            botAdd(taken, rowA, colA);
+                            botAdd(taken, rowB, colB);
                             continue;
                         } else {
                             if (checkCheck(Colour::Black)) {
@@ -897,7 +897,7 @@ int Grid::botLvl3(Colour colour) {
                         updateAllThreats();
                         if (checkCheck(colour) || piece->getThreatStatus()) {
                             add(colour, rowB, colB, rowA, colA);
-                            botAdd(taken, rowA, colA);
+                            botAdd(taken, rowB, colB);
                             continue;
                         } else {
                             if (checkCheck(Colour::White)) {
