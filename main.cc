@@ -111,7 +111,6 @@ int main() {
                     }
                 }
             }   
-        cout << "The game is ready to be played" << endl;
         } else if (cmd == "move") {
             //TODO - add check to make sure they are moving their own pieces
             if (!gameStarted) {
@@ -127,7 +126,6 @@ int main() {
                 rowB = endPos[1] - '0';
                 rowB -= 1;
                 if (rowA >= 8 || rowB >= 8 || colA >= 8 || colB >= 8) {
-                    cout << "invalid coordinates" << endl;
                     continue;
                 }
                 int result = g.move(rowA, colA, rowB, colB);
@@ -150,7 +148,6 @@ int main() {
                     rowB = endPos[1] - '0';
                     rowB -= 1;
                     if (rowA >= 8 || rowB >= 8 || colA >= 8 || colB >= 8) {
-                        cout << "invalid coordinates" << endl;
                         continue;
                     }
                     if (g.findCell(rowA,colA)->getPieceType() == PieceType::Pawn && (rowB == 7 || rowB == 0)) {
@@ -167,9 +164,8 @@ int main() {
                             }
                         } else if (result == 2) {
                             gameStarted = false;
-                            cout << "It's a stalemate" << endl;
+                            cout << "Stalemate!" << endl;
                         } else if (result == 3) {
-                            cout << "That is not a valid move" << endl;
                             continue;
                         } else if (result == 4) {
                             piece = toupper(piece[0]);
@@ -184,14 +180,14 @@ int main() {
                             }
                             if (result == 1) {
                                 if (whoseTurn == Colour::White) {
-                                    cout << "Checkmate for white. White wins!" << endl;
+                                    cout << "Checkmate! White wins!" << endl;
                                     whiteScore += 1;
                                 } else {
-                                    cout << "Checkmate for black. Black wins!" << endl;
+                                    cout << "Checkmate! Black wins!" << endl;
                                     blackScore += 1;
                                 }
                             } else if (result == 2) {
-                                cout << "Stalemate" << endl;
+                                cout << "Stalemate!" << endl;
                             }
                         }
                         if (whoseTurn == Colour::White) {
@@ -200,36 +196,29 @@ int main() {
                             whoseTurn = Colour::White;
                         }
                     } else {
-                        cout << "That is not your piece, try again" << endl;
                     }
                 } else {
                     if (whoseTurn == Colour::White) {
                         int result = g.botMove(blackBot, whoseTurn);
                         if (result == 1) {
                             whiteScore += 1;
-                            cout << "Checkmate for white. White wins!" << endl;
+                            cout << "Checkmate! White wins!" << endl;
                         } else if (result == 2) {
-                            cout << "Stalemate" << endl;
+                            cout << "Stalemate!" << endl;
                         }
                         whoseTurn = Colour::Black;
                     } else {
                         int result = g.botMove(blackBot, whoseTurn);
                         if (result == 1) {
                             blackScore += 1;
-                            cout << "Checkmate for black. Black wins!" << endl;
+                            cout << "Checkmate! Black wins!" << endl;
                         } else if (result == 2) {
-                            cout << "Stalemate" << endl;
+                            cout << "Stalemate!" << endl;
                         }
                         whoseTurn = Colour::White;
                     }
                 }
             }
-            if (whoseTurn == Colour::Black) {
-                cout << "It is now black's turn" << endl;
-            } else {
-                cout << "It is now white's turn" << endl;
-            }
-            
             cout << g;
         } else if (cmd == "setup") {
             g.init();
@@ -263,10 +252,8 @@ int main() {
                     toupper(colour[0]);
                     if (colour[0] == 'W') {
                         whoseTurn = Colour::White;
-                        cout << "It is now white's turn to go" << endl;
                     } else if (colour[0]) {
                         whoseTurn = Colour::Black;
-                        cout << "It is now black's turn to go" << endl;
                     }
                 } else {
                     break;
@@ -275,10 +262,10 @@ int main() {
         } else if (cmd == "resign") {
             if (whoseTurn == Colour::White) {
                 blackScore += 1;
-                cout << "White has resigned!" << endl;
+                cout << "Black wins!" << endl;
             } else {
                 whiteScore += 1;
-                cout << "Black has resigned!" << endl;
+                cout << "White wins!" << endl;
             }
         }
     }

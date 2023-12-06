@@ -184,12 +184,10 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
     }
     //makes sure that there is no attempt to move a piece on itself
     if (rowA == rowB && colA == colB) { 
-        cout << "you are trying to move to the square you are already in" << endl;
         return 3; 
     }
     //checks if the requested move is legal for that piece
     if(!legalMoveCheck(piece, rowA, colA, rowB, colB)) { 
-        cout << "not a legal move" << endl;
         return 3; 
     }
     if (piece == PieceType::Pawn && ((colour == Colour::White && rowB == 7) ||
@@ -239,17 +237,20 @@ int Grid::move(int rowA, int colA, int rowB, int colB) {
     gd->notify(board[rowB][colB]);
 
     if (checkCheck(opColour)) {
-        cout << "opponent is in check" << endl;
         if (checkCheckMate(opColour)) {
-            cout << "you've checkmated your opponent" << endl;
             return 1;
         }
-        //TODO - discuss if we want to return smth special for checking/output smth
-    } 
+        if (opColour == Colour::White) {
+            cout << "White is in check." << endl;
+        } else {
+            cout << "Black is in check." << endl;
+        }
+    }
+
     if (stalemateCheck(opColour)) {
-        cout << "you've reached a stalemate" << endl;
         return 2;
     }
+
     randomize(colour);
     return 0;
 }
@@ -262,14 +263,12 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
     //stores a taken piece if a piece was taken so that we can put it back after we simulate the move
     if (board[rowB][colB].getPieceType() != PieceType::NONE) {
         if (piece == PieceType::Pawn && colA == colB) {
-            cout << "pawns can't capture moving forwards" << endl;
             return false;
         }
         taken = Piece{board[rowB][colB].getPieceType(), board[rowB][colB].getPieceColour(), rowB, colB};
         capture = true;
     } else {
         if (piece == PieceType::Pawn && colA != colB) {
-            cout << "pawns can only move diagonally if they are capturing" << endl;
             return false;
         }
     }
@@ -277,19 +276,16 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
     bool castled = false;
     //stops any attempt at moving onto your own pieces
     if (board[rowB][colB].getPieceColour() == board[rowA][colA].getPieceColour()) {
-        cout << "same piece colour at destination" << endl;
         return false;
     }
     //validates any movement of a piece, making sure that the actual movement is valid
     if (!movementCheck(piece, colour, rowA, colA, rowB, colB)) {
-        cout << "the piece you are trying to move cannot move like that" << endl;
         return false;
     }
     //will check if there is a piece blocking the path between rowA colA and rowB colB except for knights
     //since knights jump over pieces and we already checked that the ending cell does not contain an ally piece
     if (piece != PieceType::Knight) {
         if (blockCheck(rowA, colA, rowB, colB)) {
-            cout << "there is a piece blocking the path" << endl;
             return false;
         }
     }
@@ -297,29 +293,23 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
     //handles castling
     if ((piece == PieceType::King) && (colA == 4) && abs(colA-colB) == 2) {
         if (checkCheck(colour)) { 
-            cout << "cannot castle because you are in check" << endl;
             return false;
         }
         if ((colB == 2 && blockCheck(rowA, 0, rowA, 4)) || (colB == 6 && blockCheck(rowA, 7, rowA, 4))) {
-            cout << "cannot castle because there is a piece in between" << endl;
             return false;
         }
         if (colour == Colour::White) {
             if (WKmoved == true) {
-                cout << "cannot castle because you've already moved the white king" << endl;
                 return false;
             }
             if ((colB == 2 && LWRmoved) || (colB == 6 && RWRmoved)) {
-                cout << "cannot castle in that direction because you've already moved that rook" << endl;
                 return false;
             }  
         } else {
             if (BKmoved == true) {
-                cout << "cannot castle because you've already moved the black king" << endl;
                 return false;
             }
             if ((colB == 2 && LBRmoved) || (colB == 6 && RBRmoved)) {
-                cout << "cannot castle in that direction because you've already moved that rook" << endl;
                 return false;
             } 
         }
@@ -327,7 +317,6 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
         this->add(colour, rowA, colA, rowB, middleCol);
         this->updateAllThreats();
         if (checkCheck(colour)) {
-            cout << "cannot castle because the spot in between would put you in check" << endl;
             this->add(colour, rowB, middleCol, rowA, colA);
             this->updateAllThreats();
             return false;
@@ -336,7 +325,6 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
         this->add(colour, rowB, middleCol, rowB, colB);
         this->updateAllThreats();
         if (checkCheck(colour)) {
-            cout << "cannot castle because the the ending position would put you in check" << endl;
             this->add(colour, rowB, colB, rowA, colA);
             this->updateAllThreats();
             return false;
@@ -368,7 +356,6 @@ bool Grid::legalMoveCheck(PieceType piece, int rowA, int colA, int rowB, int col
         }
         
         updateAllThreats();
-        cout << "this move puts you in check so it is not legal" << endl;
         return false;
     }
     this->add(colour, rowB, colB, rowA, colA);
@@ -423,28 +410,22 @@ bool Grid::checkCheck(Colour colour) {
 
 bool Grid::movementCheck(PieceType piece, Colour colour, int rowA, int colA, int rowB, int colB) {
     if (piece == PieceType::Rook) { 
-        cout << "rook movement" << endl;
         if (rowA == rowB || colA == colB) { return true; } 
     } else if (piece == PieceType::Bishop){
-        cout << "bishop movement" << endl;
         if (abs(rowA-rowB) == abs(colA-colB)) {return true;}
     }
 	else if (piece == PieceType::Knight) {
-        cout << "knight movement" << endl;
         if ((abs(rowA - rowB) == 1 && abs(colA-colB) == 2) || 
         (abs(rowA - rowB) == 2 && abs(colA-colB) == 1)) {return true;}
     }
 	else if (piece == PieceType::Queen) {
-        cout << "Queen movement" << endl;
         if (abs(rowA-rowB) == abs(colA-colB)) {return true;}
         if (rowA == rowB || colA == colB) { return true; }
     }
 	else if (piece == PieceType::King) {
-        cout << "king movement" << endl;
         if ((abs(rowA-rowB) == 1 && abs(colA-colB) == 1) || (abs(rowA-rowB) == 1 && abs(colA-colB) == 0) ||
         (abs(rowA-rowB) == 0 && abs(colA-colB) == 1) || (abs(rowA-rowB) == 0 && abs(colA-colB) == 2)) { return true; }
     } else if(piece == PieceType::Pawn) {
-        cout << "pawn movement" << endl;
         if ((abs(rowA - rowB) == 1 && abs(colA-colB) == 0) || (abs(rowA-rowB) == 2 && colA-colB == 0 && (rowA == 1 || rowA == 6)) || 
         (abs(rowA-rowB) == 1 && abs(colA-colB) == 1)) {return true;}
     }
@@ -680,7 +661,7 @@ int Grid::botLvl2(Colour colour) {
                             return 0;
                         } else {
                             add(colour, rowB, colB, rowA, colA);
-                            botAdd(taken, rowA, colA);
+                            botAdd(taken, rowB, colB);
                             continue;
                         }
                     }
@@ -759,7 +740,7 @@ int Grid::botLvl2(Colour colour) {
                             return 0;
                         } else {
                             add(colour, rowB, colB, rowA, colA);
-                            botAdd(taken, rowA, colA);
+                            botAdd(taken, rowB, colB);
                             continue;
                         }
                     }
@@ -838,7 +819,7 @@ int Grid::botLvl3(Colour colour) {
                         updateAllThreats();
                         if (checkCheck(colour) || piece->getThreatStatus()) {
                             add(colour, rowB, colB, rowA, colA);
-                            botAdd(taken, rowA, colA);
+                            botAdd(taken, rowB, colB);
                             continue;
                         } else {
                             if (checkCheck(Colour::Black)) {
@@ -897,7 +878,7 @@ int Grid::botLvl3(Colour colour) {
                         updateAllThreats();
                         if (checkCheck(colour) || piece->getThreatStatus()) {
                             add(colour, rowB, colB, rowA, colA);
-                            botAdd(taken, rowA, colA);
+                            botAdd(taken, rowB, colB);
                             continue;
                         } else {
                             if (checkCheck(Colour::White)) {
